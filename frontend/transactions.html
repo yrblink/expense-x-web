@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExpenseX — Transactions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/></svg>
+      ExpenseX
+    </div>
+    <ul class="nav-list">
+      <li><a href="/dashboard.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a></li>
+      <li><a href="/transactions.html" class="active">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+        Transactions
+      </a></li>
+      <li><a href="/bills.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Bills
+      </a></li>
+      <li><a href="/budgets.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Budgets
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="sidebar-username"></span>
+      </div>
+      <button class="btn-logout" id="btn-logout">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Transactions</h1>
+      <button class="btn btn-primary" onclick="openModal('modal-add-tx')">+ Add Transaction</button>
+    </div>
+
+    <div id="alert-tx" class="alert alert-error"></div>
+
+    <div class="panel">
+      <table class="data-table">
+        <thead><tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Notes</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="tx-tbody">
+          <tr><td colspan="5" class="text-center"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Add Transaction Modal -->
+<div class="modal-backdrop" id="modal-add-tx">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add Transaction</span>
+      <button class="modal-close" onclick="closeModal('modal-add-tx')">×</button>
+    </div>
+    <div id="alert-modal" class="alert alert-error"></div>
+    <form id="form-add-tx" onsubmit="handleAddTx(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="tx-date">Date</label>
+          <input class="form-control" id="tx-date" type="date" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tx-category">Category</label>
+          <select class="form-control" id="tx-category" required>
+            <option value="">Select…</option>
+            <option>Groceries</option>
+            <option>Transportation</option>
+            <option>Dining Out</option>
+            <option>Entertainment</option>
+            <option>Utilities</option>
+            <option>Healthcare</option>
+            <option>Shopping</option>
+            <option>Education</option>
+            <option>Personal Care</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="tx-amount">Amount ($)</label>
+        <input class="form-control" id="tx-amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="tx-notes">Notes (optional)</label>
+        <input class="form-control" id="tx-notes" type="text" placeholder="What was this for?" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('modal-add-tx')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/transactions.js"></script>
+</body>
+</html>

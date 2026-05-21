@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExpenseX — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/></svg>
+      ExpenseX
+    </div>
+    <ul class="nav-list">
+      <li><a href="/dashboard.html" class="active">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a></li>
+      <li><a href="/transactions.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+        Transactions
+      </a></li>
+      <li><a href="/bills.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Bills
+      </a></li>
+      <li><a href="/budgets.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Budgets
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="sidebar-username"></span>
+      </div>
+      <button class="btn-logout" id="btn-logout">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Dashboard</h1>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="text-sub" style="font-size:13px;">Balance:</span>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-balance')">Update Balance</button>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-card-label">Current Balance</div>
+        <div class="stat-card-value green" id="stat-balance">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Spent This Month</div>
+        <div class="stat-card-value red" id="stat-spent">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Unpaid Bills</div>
+        <div class="stat-card-value yellow" id="stat-bills">—</div>
+      </div>
+    </div>
+
+    <!-- Chart + Recent transactions -->
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">Spending by Category</div>
+        <div class="chart-wrap">
+          <canvas id="spending-chart"></canvas>
+          <p class="no-data" id="chart-no-data" style="display:none;">No spending data this month</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+          Recent Transactions
+          <a href="/transactions.html" style="font-size:12px;font-weight:400;text-transform:none;letter-spacing:0;">View all →</a>
+        </div>
+        <table class="data-table">
+          <thead><tr>
+            <th>Date</th><th>Category</th><th>Amount</th><th>Notes</th>
+          </tr></thead>
+          <tbody id="recent-tbody">
+            <tr><td colspan="4" class="text-center"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Balance after bills -->
+    <div class="panel mt-24" style="margin-top:20px;">
+      <div class="panel-title">Projected Balance</div>
+      <div style="display:flex;gap:48px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:12px;color:var(--subtext);margin-bottom:4px;">Current Balance</div>
+          <div style="font-size:20px;font-weight:700;" id="proj-balance">—</div>
+        </div>
+        <div style="display:flex;align-items:center;font-size:22px;color:var(--subtext);">−</div>
+        <div>
+          <div style="font-size:12px;color:var(--subtext);margin-bottom:4px;">Unpaid Bills Total</div>
+          <div style="font-size:20px;font-weight:700;color:var(--red);" id="proj-bills">—</div>
+        </div>
+        <div style="display:flex;align-items:center;font-size:22px;color:var(--subtext);">=</div>
+        <div>
+          <div style="font-size:12px;color:var(--subtext);margin-bottom:4px;">After Bills</div>
+          <div style="font-size:20px;font-weight:700;" id="proj-after">—</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Update Balance Modal -->
+<div class="modal-backdrop" id="modal-balance">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Update Balance</span>
+      <button class="modal-close" onclick="closeModal('modal-balance')">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="input-balance">Available Balance ($)</label>
+      <input class="form-control" id="input-balance" type="number" step="0.01" min="0" placeholder="e.g. 2400.00" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-balance')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBalance()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

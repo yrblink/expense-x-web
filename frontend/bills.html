@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ExpenseX — Bills</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M22 2 12 12"/></svg>
+      ExpenseX
+    </div>
+    <ul class="nav-list">
+      <li><a href="/dashboard.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a></li>
+      <li><a href="/transactions.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+        Transactions
+      </a></li>
+      <li><a href="/bills.html" class="active">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Bills
+      </a></li>
+      <li><a href="/budgets.html">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Budgets
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="sidebar-username"></span>
+      </div>
+      <button class="btn-logout" id="btn-logout">Sign Out</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Bills</h1>
+      <button class="btn btn-primary" onclick="openModal('modal-add-bill')">+ Add Bill</button>
+    </div>
+
+    <!-- Balance summary -->
+    <div class="summary-bar">
+      <div>
+        <div class="summary-item-label">Current Balance</div>
+        <div class="summary-item-value" id="sum-balance">—</div>
+      </div>
+      <div>
+        <div class="summary-item-label">Total Unpaid Bills</div>
+        <div class="summary-item-value" style="color:var(--red);" id="sum-bills">—</div>
+      </div>
+      <div>
+        <div class="summary-item-label">Balance After Bills</div>
+        <div class="summary-item-value" id="sum-after">—</div>
+      </div>
+    </div>
+
+    <div id="alert-bills" class="alert alert-error"></div>
+
+    <div id="bill-grid" class="bill-grid">
+      <div style="grid-column:1/-1;text-align:center;"><div class="spinner"></div></div>
+    </div>
+  </main>
+</div>
+
+<!-- Add Bill Modal -->
+<div class="modal-backdrop" id="modal-add-bill">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add Bill</span>
+      <button class="modal-close" onclick="closeModal('modal-add-bill')">×</button>
+    </div>
+    <div id="alert-bill-modal" class="alert alert-error"></div>
+    <form id="form-add-bill" onsubmit="handleAddBill(event)">
+      <div class="form-group">
+        <label class="form-label" for="bill-name">Bill Name</label>
+        <input class="form-control" id="bill-name" type="text" placeholder="e.g. Rent, Netflix" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="bill-category">Category</label>
+          <select class="form-control" id="bill-category" required>
+            <option value="">Select…</option>
+            <option>Rent</option>
+            <option>Utilities</option>
+            <option>Insurance</option>
+            <option>Subscriptions</option>
+            <option>Loan</option>
+            <option>Internet</option>
+            <option>Phone</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="bill-amount">Amount Due ($)</label>
+          <input class="form-control" id="bill-amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="bill-due">Due Date</label>
+        <input class="form-control" id="bill-due" type="date" required />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('modal-add-bill')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Bill</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/bills.js"></script>
+</body>
+</html>

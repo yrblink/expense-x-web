@@ -1,0 +1,20 @@
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Compiled binaries
+*.exe
+*.pdb
+*.ilk
+*.lib
+*.obj
+*.res
+
+# Build output
+out/
+
+# Visual Studio
+.vs/
+*.opendb
+*.vsidx
