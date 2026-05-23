@@ -19,7 +19,11 @@ async function loadDashboard() {
         apiGet('/transactions'),
     ]);
 
-    if (!summaryRes || !txRes) return;
+    if (!summaryRes || !txRes) {
+        const tbody = document.getElementById('recent-tbody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-center text-sub" style="padding:24px;">Could not connect to server</td></tr>';
+        return;
+    }
 
     const summary = await summaryRes.json();
     const txData  = await txRes.json();
@@ -124,16 +128,20 @@ function renderRecentTx(txList) {
 
 function openBalanceModal() {
     const input = document.getElementById('input-balance');
-    if (input && lastSummary) input.value = lastSummary.startingBalance.toFixed(2);
+    if (input && lastSummary && lastSummary.startingBalance != null)
+        input.value = lastSummary.startingBalance.toFixed(2);
+    hideAlert('alert-balance');
     openModal('modal-balance');
 }
 
 async function saveStartingBalance() {
     const val = parseFloat(document.getElementById('input-balance').value);
-    if (isNaN(val)) return;
+    if (isNaN(val)) return showAlert('alert-balance', 'Enter a valid number');
     const res = await apiPut('/user/starting_balance', { startingBalance: val });
     if (res && res.ok) {
         closeModal('modal-balance');
         await loadDashboard();
+    } else {
+        showAlert('alert-balance', 'Failed to save — check your connection');
     }
 }

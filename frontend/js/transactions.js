@@ -21,15 +21,21 @@ function setTxType(type) {
         b.classList.toggle('active', b.dataset.type === type);
     });
     const select = document.getElementById('tx-category');
-    select.innerHTML = '<option value="">Select…</option>' +
-        TX_CATEGORIES[type].map(c => `<option>${c}</option>`).join('');
-    document.getElementById('btn-tx-submit').textContent =
-        type === 'income' ? 'Add Income' : 'Add Expense';
+    if (select) {
+        select.innerHTML = '<option value="">Select…</option>' +
+            TX_CATEGORIES[type].map(c => `<option>${c}</option>`).join('');
+    }
+    const submitBtn = document.getElementById('btn-tx-submit');
+    if (submitBtn) submitBtn.textContent = type === 'income' ? 'Add Income' : 'Add Expense';
 }
 
 async function loadTransactions() {
     const res = await apiGet('/transactions');
-    if (!res) return;
+    if (!res) {
+        const tbody = document.getElementById('tx-tbody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-sub" style="padding:40px;">Could not connect to server</td></tr>';
+        return;
+    }
     const data = await res.json();
     renderTable(data);
 }
