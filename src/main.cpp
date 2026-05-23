@@ -64,7 +64,8 @@ int main() {
             return send(res, 409, {{"error", "Username already taken"}});
 
         auto token = auth.createSession(uid);
-        send(res, 201, {{"token", token}, {"userId", uid}, {"username", username}, {"balance", 0.0}});
+        send(res, 201, {{"token", token}, {"userId", uid}, {"username", username},
+                        {"balance", 0.0}, {"startingBalance", 0.0}});
     });
 
     svr.Post("/api/login", [&](const httplib::Request& req, httplib::Response& res) {
@@ -79,9 +80,12 @@ int main() {
                                           user->passwordHash, user->salt))
             return send(res, 401, {{"error", "Invalid credentials"}});
 
-        auto token = auth.createSession(user->id);
+        auto   token   = auth.createSession(user->id);
+        double balance = db.calculateBalance(user->id);
         send(res, 200, {{"token", token}, {"userId", user->id},
-                        {"username", user->username}, {"balance", user->balance}});
+                        {"username", user->username},
+                        {"balance", balance},
+                        {"startingBalance", user->startingBalance}});
     });
 
     svr.Post("/api/logout", [&](const httplib::Request& req, httplib::Response& res) {
@@ -99,22 +103,23 @@ int main() {
 
         auto user = db.findUserById(*uid);
         if (!user) return send(res, 404, {{"error", "User not found"}});
-        send(res, 200, {{"username", user->username}, {"balance", user->balance}});
+        send(res, 200, {{"username",        user->username},
+                        {"balance",         db.calculateBalance(*uid)},
+                        {"startingBalance", user->startingBalance}});
     });
 
-    svr.Put("/api/user/balance", [&](const httplib::Request& req, httplib::Response& res) {
+    svr.Put("/api/user/starting_balance", [&](const httplib::Request& req, httplib::Response& res) {
         auto uid = authedUser(req, auth);
         if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
 
         auto body = json::parse(req.body, nullptr, false);
-        if (body.is_discarded() || !body.contains("balance"))
-            return send(res, 400, {{"error", "balance required"}});
+        if (body.is_discarded() || !body.contains("startingBalance"))
+            return send(res, 400, {{"error", "startingBalance required"}});
 
-        double bal = body["balance"].get<double>();
-        if (bal < 0) return send(res, 400, {{"error", "Balance cannot be negative"}});
-
-        db.updateBalance(*uid, bal);
-        send(res, 200, {{"balance", bal}});
+        double sb = body["startingBalance"].get<double>();
+        db.updateStartingBalance(*uid, sb);
+        send(res, 200, {{"startingBalance", sb},
+                        {"balance",         db.calculateBalance(*uid)}});
     });
 
     // ── Transactions ─────────────────────────────────────────────────────────
@@ -127,7 +132,7 @@ int main() {
         json arr  = json::array();
         for (auto& t : rows)
             arr.push_back({{"id",t.id},{"date",t.date},{"category",t.category},
-                           {"amount",t.amount},{"notes",t.notes}});
+                           {"amount",t.amount},{"notes",t.notes},{"type",t.type}});
         send(res, 200, arr);
     });
 
@@ -140,20 +145,23 @@ int main() {
             !body.contains("date") || !body.contains("category") || !body.contains("amount"))
             return send(res, 400, {{"error", "date, category, and amount required"}});
 
+        std::string type = body.value("type", std::string{"expense"});
+        if (type != "expense" && type != "income")
+            return send(res, 400, {{"error", "type must be 'expense' or 'income'"}});
+
         double amount = body["amount"].get<double>();
+        if (amount <= 0) return send(res, 400, {{"error", "amount must be positive"}});
+
         std::string notes = body.value("notes", "");
         int id = db.addTransaction(*uid,
                                    body["date"].get<std::string>(),
                                    body["category"].get<std::string>(),
                                    amount,
-                                   notes);
+                                   notes,
+                                   type);
         if (id < 0) return send(res, 500, {{"error", "Failed to save transaction"}});
 
-        auto user = db.findUserById(*uid);
-        double newBalance = (user ? user->balance : 0.0) - amount;
-        db.updateBalance(*uid, newBalance);
-
-        send(res, 201, {{"id", id}, {"balance", newBalance}});
+        send(res, 201, {{"id", id}, {"balance", db.calculateBalance(*uid)}});
     });
 
     svr.Delete("/api/transactions/(\\d+)", [&](const httplib::Request& req, httplib::Response& res) {
@@ -161,16 +169,10 @@ int main() {
         if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
 
         int txId = std::stoi(req.matches[1]);
-        auto tx  = db.getTransaction(txId, *uid);
-        if (!tx) return send(res, 404, {{"error", "Transaction not found"}});
+        if (!db.deleteTransaction(txId, *uid))
+            return send(res, 404, {{"error", "Transaction not found"}});
 
-        db.deleteTransaction(txId, *uid);
-
-        auto user = db.findUserById(*uid);
-        double newBalance = (user ? user->balance : 0.0) + tx->amount;
-        db.updateBalance(*uid, newBalance);
-
-        send(res, 200, {{"ok", true}, {"balance", newBalance}});
+        send(res, 200, {{"ok", true}, {"balance", db.calculateBalance(*uid)}});
     });
 
     // ── Bills ─────────────────────────────────────────────────────────────────
@@ -214,7 +216,17 @@ int main() {
         int billId = std::stoi(req.matches[1]);
         if (!db.payBill(billId, *uid))
             return send(res, 404, {{"error", "Bill not found"}});
-        send(res, 200, {{"ok", true}});
+        send(res, 200, {{"ok", true}, {"balance", db.calculateBalance(*uid)}});
+    });
+
+    svr.Put("/api/bills/(\\d+)/unpay", [&](const httplib::Request& req, httplib::Response& res) {
+        auto uid = authedUser(req, auth);
+        if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
+
+        int billId = std::stoi(req.matches[1]);
+        if (!db.unpayBill(billId, *uid))
+            return send(res, 404, {{"error", "Bill not found"}});
+        send(res, 200, {{"ok", true}, {"balance", db.calculateBalance(*uid)}});
     });
 
     svr.Delete("/api/bills/(\\d+)", [&](const httplib::Request& req, httplib::Response& res) {
@@ -224,7 +236,7 @@ int main() {
         int billId = std::stoi(req.matches[1]);
         if (!db.deleteBill(billId, *uid))
             return send(res, 404, {{"error", "Bill not found"}});
-        send(res, 200, {{"ok", true}});
+        send(res, 200, {{"ok", true}, {"balance", db.calculateBalance(*uid)}});
     });
 
     // ── Summary ───────────────────────────────────────────────────────────────
@@ -234,11 +246,16 @@ int main() {
         if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
 
         auto user       = db.findUserById(*uid);
+        if (!user) return send(res, 404, {{"error", "User not found"}});
+
         auto categories = db.getCategorySummary(*uid);
         auto bills      = db.getBills(*uid);
 
-        double totalSpent = 0;
-        for (auto& c : categories) totalSpent += c.total;
+        double monthlyIncome   = db.sumTransactions(*uid, "income",  true);
+        double monthlySpent    = db.sumTransactions(*uid, "expense", true);
+        double allTimeIncome   = db.sumTransactions(*uid, "income",  false);
+        double allTimeExpenses = db.sumTransactions(*uid, "expense", false);
+        double paidBills       = db.sumPaidBills(*uid);
 
         double billsDue = 0;
         for (auto& b : bills) if (!b.isPaid) billsDue += b.amountDue;
@@ -247,12 +264,17 @@ int main() {
         for (auto& c : categories)
             catArr.push_back({{"category", c.category}, {"total", c.total}});
 
-        double balance = user ? user->balance : 0.0;
+        double balance = db.calculateBalance(*uid);
         send(res, 200, {
             {"balance",           balance},
-            {"totalSpent",        totalSpent},
+            {"startingBalance",   user->startingBalance},
+            {"monthlyIncome",     monthlyIncome},
+            {"totalSpent",        monthlySpent},
             {"billsDue",          billsDue},
             {"balanceAfterBills", balance - billsDue},
+            {"allTimeIncome",     allTimeIncome},
+            {"allTimeExpenses",   allTimeExpenses},
+            {"allTimePaidBills",  paidBills},
             {"byCategory",        catArr}
         });
     });

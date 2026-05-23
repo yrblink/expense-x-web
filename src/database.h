@@ -9,7 +9,7 @@ struct UserRecord {
     std::string username;
     std::string passwordHash;
     std::string salt;
-    double      balance;
+    double      startingBalance;
 };
 
 struct TransactionRecord {
@@ -18,6 +18,7 @@ struct TransactionRecord {
     std::string category;
     double      amount;
     std::string notes;
+    std::string type;        // "expense" or "income"
     std::string createdAt;
 };
 
@@ -46,6 +47,7 @@ class Database {
     sqlite3* db = nullptr;
 
     bool exec(const char* sql);
+    bool columnExists(const char* table, const char* column);
 
 public:
     explicit Database(const std::string& path);
@@ -57,15 +59,22 @@ public:
                                           const std::string& salt);
     std::optional<UserRecord>  findUser(const std::string& username);
     std::optional<UserRecord>  findUserById(int id);
-    bool                       updateBalance(int userId, double balance);
+    bool                       updateStartingBalance(int userId, double amount);
+
+    // Balance is always derived: starting + income - expenses - paid bills.
+    double                     calculateBalance(int userId);
 
     // Transactions
     int                              addTransaction(int userId, const std::string& date,
                                                     const std::string& category,
-                                                    double amount, const std::string& notes);
+                                                    double amount, const std::string& notes,
+                                                    const std::string& type);
     std::vector<TransactionRecord>   getTransactions(int userId);
     std::optional<TransactionRecord> getTransaction(int id, int userId);
     bool                             deleteTransaction(int id, int userId);
+
+    // Aggregated sums by transaction type.
+    double  sumTransactions(int userId, const std::string& type, bool monthOnly);
 
     // Bills
     int                       addBill(int userId, const std::string& name,
@@ -73,7 +82,9 @@ public:
                                       double amountDue, const std::string& dueDate);
     std::vector<BillRecord>   getBills(int userId);
     bool                      payBill(int id, int userId);
+    bool                      unpayBill(int id, int userId);
     bool                      deleteBill(int id, int userId);
+    double                    sumPaidBills(int userId);
 
     // Summary & Budgets
     std::vector<CategorySummary>  getCategorySummary(int userId);

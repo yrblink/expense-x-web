@@ -1,6 +1,7 @@
 #include "database.h"
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 Database::Database(const std::string& path) {
     if (sqlite3_open(path.c_str(), &db) != SQLITE_OK)
@@ -10,12 +11,13 @@ Database::Database(const std::string& path) {
 
     exec(R"(
         CREATE TABLE IF NOT EXISTS users (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            username      TEXT    UNIQUE NOT NULL,
-            password_hash TEXT    NOT NULL,
-            salt          TEXT    NOT NULL,
-            balance       REAL    DEFAULT 0.0,
-            created_at    TEXT    DEFAULT (datetime('now'))
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            username         TEXT    UNIQUE NOT NULL,
+            password_hash    TEXT    NOT NULL,
+            salt             TEXT    NOT NULL,
+            balance          REAL    DEFAULT 0.0,
+            starting_balance REAL    DEFAULT 0.0,
+            created_at       TEXT    DEFAULT (datetime('now'))
         );
         CREATE TABLE IF NOT EXISTS transactions (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,6 +26,7 @@ Database::Database(const std::string& path) {
             category   TEXT    NOT NULL,
             amount     REAL    NOT NULL,
             notes      TEXT    DEFAULT '',
+            type       TEXT    NOT NULL DEFAULT 'expense',
             created_at TEXT    DEFAULT (datetime('now')),
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
@@ -47,6 +50,34 @@ Database::Database(const std::string& path) {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
     )");
+
+    // Schema migration: derived-balance model.
+    // Old databases stored `users.balance` as a manually-typed snapshot adjusted by
+    // transaction add/delete. New databases derive balance from starting_balance +
+    // income - expenses - paid bills. Backfill so existing users see the same number.
+    int schemaVersion = 0;
+    sqlite3_stmt* vs;
+    sqlite3_prepare_v2(db, "PRAGMA user_version", -1, &vs, nullptr);
+    if (sqlite3_step(vs) == SQLITE_ROW) schemaVersion = sqlite3_column_int(vs, 0);
+    sqlite3_finalize(vs);
+
+    if (schemaVersion < 1) {
+        if (!columnExists("users", "starting_balance"))
+            exec("ALTER TABLE users ADD COLUMN starting_balance REAL DEFAULT 0.0;");
+        if (!columnExists("transactions", "type"))
+            exec("ALTER TABLE transactions ADD COLUMN type TEXT NOT NULL DEFAULT 'expense';");
+
+        // old_balance = starting - sum(expenses), so starting = old_balance + sum(expenses).
+        // Paid bills are also added back since they will now be deducted in the derivation.
+        exec(R"(
+            UPDATE users SET starting_balance = balance +
+              COALESCE((SELECT SUM(amount)     FROM transactions
+                        WHERE user_id = users.id), 0) +
+              COALESCE((SELECT SUM(amount_due) FROM bills
+                        WHERE user_id = users.id AND is_paid = 1), 0);
+        )");
+        exec("PRAGMA user_version = 1;");
+    }
 }
 
 Database::~Database() {
@@ -58,6 +89,19 @@ bool Database::exec(const char* sql) {
     bool  ok  = sqlite3_exec(db, sql, nullptr, nullptr, &err) == SQLITE_OK;
     if (err) { std::cerr << "SQL: " << err << '\n'; sqlite3_free(err); }
     return ok;
+}
+
+bool Database::columnExists(const char* table, const char* column) {
+    std::string sql = "PRAGMA table_info(" + std::string(table) + ")";
+    sqlite3_stmt* s;
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &s, nullptr);
+    bool found = false;
+    while (sqlite3_step(s) == SQLITE_ROW) {
+        const char* name = reinterpret_cast<const char*>(sqlite3_column_text(s, 1));
+        if (name && std::string(name) == column) { found = true; break; }
+    }
+    sqlite3_finalize(s);
+    return found;
 }
 
 // ─── Users ────────────────────────────────────────────────────────────────────
@@ -76,16 +120,16 @@ int Database::createUser(const std::string& username, const std::string& hash, c
 std::optional<UserRecord> Database::findUser(const std::string& username) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db,
-        "SELECT id, username, password_hash, salt, balance FROM users WHERE username = ?",
+        "SELECT id, username, password_hash, salt, starting_balance FROM users WHERE username = ?",
         -1, &s, nullptr);
     sqlite3_bind_text(s, 1, username.c_str(), -1, SQLITE_STATIC);
     if (sqlite3_step(s) == SQLITE_ROW) {
         UserRecord u;
-        u.id           = sqlite3_column_int(s, 0);
-        u.username     = reinterpret_cast<const char*>(sqlite3_column_text(s, 1));
-        u.passwordHash = reinterpret_cast<const char*>(sqlite3_column_text(s, 2));
-        u.salt         = reinterpret_cast<const char*>(sqlite3_column_text(s, 3));
-        u.balance      = sqlite3_column_double(s, 4);
+        u.id              = sqlite3_column_int(s, 0);
+        u.username        = reinterpret_cast<const char*>(sqlite3_column_text(s, 1));
+        u.passwordHash    = reinterpret_cast<const char*>(sqlite3_column_text(s, 2));
+        u.salt            = reinterpret_cast<const char*>(sqlite3_column_text(s, 3));
+        u.startingBalance = sqlite3_column_double(s, 4);
         sqlite3_finalize(s);
         return u;
     }
@@ -96,16 +140,16 @@ std::optional<UserRecord> Database::findUser(const std::string& username) {
 std::optional<UserRecord> Database::findUserById(int id) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db,
-        "SELECT id, username, password_hash, salt, balance FROM users WHERE id = ?",
+        "SELECT id, username, password_hash, salt, starting_balance FROM users WHERE id = ?",
         -1, &s, nullptr);
     sqlite3_bind_int(s, 1, id);
     if (sqlite3_step(s) == SQLITE_ROW) {
         UserRecord u;
-        u.id           = sqlite3_column_int(s, 0);
-        u.username     = reinterpret_cast<const char*>(sqlite3_column_text(s, 1));
-        u.passwordHash = reinterpret_cast<const char*>(sqlite3_column_text(s, 2));
-        u.salt         = reinterpret_cast<const char*>(sqlite3_column_text(s, 3));
-        u.balance      = sqlite3_column_double(s, 4);
+        u.id              = sqlite3_column_int(s, 0);
+        u.username        = reinterpret_cast<const char*>(sqlite3_column_text(s, 1));
+        u.passwordHash    = reinterpret_cast<const char*>(sqlite3_column_text(s, 2));
+        u.salt            = reinterpret_cast<const char*>(sqlite3_column_text(s, 3));
+        u.startingBalance = sqlite3_column_double(s, 4);
         sqlite3_finalize(s);
         return u;
     }
@@ -113,29 +157,49 @@ std::optional<UserRecord> Database::findUserById(int id) {
     return std::nullopt;
 }
 
-bool Database::updateBalance(int userId, double balance) {
+bool Database::updateStartingBalance(int userId, double amount) {
     sqlite3_stmt* s;
-    sqlite3_prepare_v2(db, "UPDATE users SET balance = ? WHERE id = ?", -1, &s, nullptr);
-    sqlite3_bind_double(s, 1, balance);
+    sqlite3_prepare_v2(db, "UPDATE users SET starting_balance = ? WHERE id = ?", -1, &s, nullptr);
+    sqlite3_bind_double(s, 1, amount);
     sqlite3_bind_int(s,    2, userId);
     int rc = sqlite3_step(s);
     sqlite3_finalize(s);
     return rc == SQLITE_DONE;
 }
 
+double Database::calculateBalance(int userId) {
+    sqlite3_stmt* s;
+    sqlite3_prepare_v2(db,
+        "SELECT starting_balance + "
+        "  COALESCE((SELECT SUM(amount)     FROM transactions WHERE user_id = ? AND type = 'income'),  0) - "
+        "  COALESCE((SELECT SUM(amount)     FROM transactions WHERE user_id = ? AND type = 'expense'), 0) - "
+        "  COALESCE((SELECT SUM(amount_due) FROM bills        WHERE user_id = ? AND is_paid = 1),      0) "
+        "FROM users WHERE id = ?",
+        -1, &s, nullptr);
+    sqlite3_bind_int(s, 1, userId);
+    sqlite3_bind_int(s, 2, userId);
+    sqlite3_bind_int(s, 3, userId);
+    sqlite3_bind_int(s, 4, userId);
+    double balance = 0.0;
+    if (sqlite3_step(s) == SQLITE_ROW) balance = sqlite3_column_double(s, 0);
+    sqlite3_finalize(s);
+    return balance;
+}
+
 // ─── Transactions ─────────────────────────────────────────────────────────────
 
 int Database::addTransaction(int userId, const std::string& date, const std::string& category,
-                              double amount, const std::string& notes) {
+                              double amount, const std::string& notes, const std::string& type) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db,
-        "INSERT INTO transactions (user_id, date, category, amount, notes) VALUES (?,?,?,?,?)",
+        "INSERT INTO transactions (user_id, date, category, amount, notes, type) VALUES (?,?,?,?,?,?)",
         -1, &s, nullptr);
     sqlite3_bind_int(s,    1, userId);
     sqlite3_bind_text(s,   2, date.c_str(),     -1, SQLITE_STATIC);
     sqlite3_bind_text(s,   3, category.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_double(s, 4, amount);
     sqlite3_bind_text(s,   5, notes.c_str(),    -1, SQLITE_STATIC);
+    sqlite3_bind_text(s,   6, type.c_str(),     -1, SQLITE_STATIC);
     int rc = sqlite3_step(s);
     sqlite3_finalize(s);
     return rc == SQLITE_DONE ? (int)sqlite3_last_insert_rowid(db) : -1;
@@ -144,7 +208,7 @@ int Database::addTransaction(int userId, const std::string& date, const std::str
 std::vector<TransactionRecord> Database::getTransactions(int userId) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db,
-        "SELECT id, date, category, amount, notes, created_at "
+        "SELECT id, date, category, amount, notes, type, created_at "
         "FROM transactions WHERE user_id = ? ORDER BY date DESC, created_at DESC",
         -1, &s, nullptr);
     sqlite3_bind_int(s, 1, userId);
@@ -158,7 +222,8 @@ std::vector<TransactionRecord> Database::getTransactions(int userId) {
         t.amount    = sqlite3_column_double(s, 3);
         auto* n     = sqlite3_column_text(s, 4);
         t.notes     = n ? reinterpret_cast<const char*>(n) : "";
-        t.createdAt = reinterpret_cast<const char*>(sqlite3_column_text(s, 5));
+        t.type      = reinterpret_cast<const char*>(sqlite3_column_text(s, 5));
+        t.createdAt = reinterpret_cast<const char*>(sqlite3_column_text(s, 6));
         out.push_back(t);
     }
     sqlite3_finalize(s);
@@ -168,7 +233,7 @@ std::vector<TransactionRecord> Database::getTransactions(int userId) {
 std::optional<TransactionRecord> Database::getTransaction(int id, int userId) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db,
-        "SELECT id, date, category, amount, notes, created_at "
+        "SELECT id, date, category, amount, notes, type, created_at "
         "FROM transactions WHERE id = ? AND user_id = ?",
         -1, &s, nullptr);
     sqlite3_bind_int(s, 1, id);
@@ -181,7 +246,8 @@ std::optional<TransactionRecord> Database::getTransaction(int id, int userId) {
         t.amount    = sqlite3_column_double(s, 3);
         auto* n     = sqlite3_column_text(s, 4);
         t.notes     = n ? reinterpret_cast<const char*>(n) : "";
-        t.createdAt = reinterpret_cast<const char*>(sqlite3_column_text(s, 5));
+        t.type      = reinterpret_cast<const char*>(sqlite3_column_text(s, 5));
+        t.createdAt = reinterpret_cast<const char*>(sqlite3_column_text(s, 6));
         sqlite3_finalize(s);
         return t;
     }
@@ -197,6 +263,21 @@ bool Database::deleteTransaction(int id, int userId) {
     int rc = sqlite3_step(s);
     sqlite3_finalize(s);
     return rc == SQLITE_DONE && sqlite3_changes(db) > 0;
+}
+
+double Database::sumTransactions(int userId, const std::string& type, bool monthOnly) {
+    std::string sql = "SELECT COALESCE(SUM(amount), 0) FROM transactions "
+                      "WHERE user_id = ? AND type = ?";
+    if (monthOnly) sql += " AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')";
+
+    sqlite3_stmt* s;
+    sqlite3_prepare_v2(db, sql.c_str(), -1, &s, nullptr);
+    sqlite3_bind_int(s,  1, userId);
+    sqlite3_bind_text(s, 2, type.c_str(), -1, SQLITE_STATIC);
+    double total = 0.0;
+    if (sqlite3_step(s) == SQLITE_ROW) total = sqlite3_column_double(s, 0);
+    sqlite3_finalize(s);
+    return total;
 }
 
 // ─── Bills ────────────────────────────────────────────────────────────────────
@@ -250,6 +331,16 @@ bool Database::payBill(int id, int userId) {
     return rc == SQLITE_DONE && sqlite3_changes(db) > 0;
 }
 
+bool Database::unpayBill(int id, int userId) {
+    sqlite3_stmt* s;
+    sqlite3_prepare_v2(db, "UPDATE bills SET is_paid = 0 WHERE id = ? AND user_id = ?", -1, &s, nullptr);
+    sqlite3_bind_int(s, 1, id);
+    sqlite3_bind_int(s, 2, userId);
+    int rc = sqlite3_step(s);
+    sqlite3_finalize(s);
+    return rc == SQLITE_DONE && sqlite3_changes(db) > 0;
+}
+
 bool Database::deleteBill(int id, int userId) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db, "DELETE FROM bills WHERE id = ? AND user_id = ?", -1, &s, nullptr);
@@ -260,13 +351,26 @@ bool Database::deleteBill(int id, int userId) {
     return rc == SQLITE_DONE && sqlite3_changes(db) > 0;
 }
 
+double Database::sumPaidBills(int userId) {
+    sqlite3_stmt* s;
+    sqlite3_prepare_v2(db,
+        "SELECT COALESCE(SUM(amount_due), 0) FROM bills WHERE user_id = ? AND is_paid = 1",
+        -1, &s, nullptr);
+    sqlite3_bind_int(s, 1, userId);
+    double total = 0.0;
+    if (sqlite3_step(s) == SQLITE_ROW) total = sqlite3_column_double(s, 0);
+    sqlite3_finalize(s);
+    return total;
+}
+
 // ─── Summary & Budgets ────────────────────────────────────────────────────────
 
 std::vector<CategorySummary> Database::getCategorySummary(int userId) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db,
         "SELECT category, SUM(amount) FROM transactions "
-        "WHERE user_id = ? AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now') "
+        "WHERE user_id = ? AND type = 'expense' "
+        "AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now') "
         "GROUP BY category ORDER BY SUM(amount) DESC",
         -1, &s, nullptr);
     sqlite3_bind_int(s, 1, userId);
@@ -302,6 +406,7 @@ std::vector<BudgetRecord> Database::getBudgets(int userId) {
         "SELECT b.id, b.category, b.monthly_limit, "
         "COALESCE((SELECT SUM(t.amount) FROM transactions t "
         "          WHERE t.user_id = b.user_id AND t.category = b.category "
+        "          AND t.type = 'expense' "
         "          AND strftime('%Y-%m', t.date) = strftime('%Y-%m', 'now')), 0) "
         "FROM budgets b WHERE b.user_id = ? ORDER BY b.category",
         -1, &s, nullptr);
