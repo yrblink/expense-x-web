@@ -71,6 +71,9 @@ public:
                                                     const std::string& type);
     std::vector<TransactionRecord>   getTransactions(int userId);
     std::optional<TransactionRecord> getTransaction(int id, int userId);
+    bool                             updateTransaction(int id, int userId, const std::string& date,
+                                                      const std::string& category, double amount,
+                                                      const std::string& notes, const std::string& type);
     bool                             deleteTransaction(int id, int userId);
 
     // Aggregated sums by transaction type.
@@ -81,6 +84,9 @@ public:
                                       const std::string& category,
                                       double amountDue, const std::string& dueDate);
     std::vector<BillRecord>   getBills(int userId);
+    bool                      updateBill(int id, int userId, const std::string& name,
+                                         const std::string& category,
+                                         double amountDue, const std::string& dueDate);
     bool                      payBill(int id, int userId);
     bool                      unpayBill(int id, int userId);
     bool                      deleteBill(int id, int userId);

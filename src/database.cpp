@@ -255,6 +255,26 @@ std::optional<TransactionRecord> Database::getTransaction(int id, int userId) {
     return std::nullopt;
 }
 
+bool Database::updateTransaction(int id, int userId, const std::string& date,
+                                  const std::string& category, double amount,
+                                  const std::string& notes, const std::string& type) {
+    sqlite3_stmt* s;
+    sqlite3_prepare_v2(db,
+        "UPDATE transactions SET date=?, category=?, amount=?, notes=?, type=? "
+        "WHERE id=? AND user_id=?",
+        -1, &s, nullptr);
+    sqlite3_bind_text(s,   1, date.c_str(),     -1, SQLITE_STATIC);
+    sqlite3_bind_text(s,   2, category.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_double(s, 3, amount);
+    sqlite3_bind_text(s,   4, notes.c_str(),    -1, SQLITE_STATIC);
+    sqlite3_bind_text(s,   5, type.c_str(),     -1, SQLITE_STATIC);
+    sqlite3_bind_int(s,    6, id);
+    sqlite3_bind_int(s,    7, userId);
+    int rc = sqlite3_step(s);
+    sqlite3_finalize(s);
+    return rc == SQLITE_DONE && sqlite3_changes(db) > 0;
+}
+
 bool Database::deleteTransaction(int id, int userId) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db, "DELETE FROM transactions WHERE id = ? AND user_id = ?", -1, &s, nullptr);
@@ -319,6 +339,25 @@ std::vector<BillRecord> Database::getBills(int userId) {
     }
     sqlite3_finalize(s);
     return out;
+}
+
+bool Database::updateBill(int id, int userId, const std::string& name,
+                           const std::string& category,
+                           double amountDue, const std::string& dueDate) {
+    sqlite3_stmt* s;
+    sqlite3_prepare_v2(db,
+        "UPDATE bills SET name=?, category=?, amount_due=?, due_date=? "
+        "WHERE id=? AND user_id=?",
+        -1, &s, nullptr);
+    sqlite3_bind_text(s,   1, name.c_str(),     -1, SQLITE_STATIC);
+    sqlite3_bind_text(s,   2, category.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_double(s, 3, amountDue);
+    sqlite3_bind_text(s,   4, dueDate.c_str(),  -1, SQLITE_STATIC);
+    sqlite3_bind_int(s,    5, id);
+    sqlite3_bind_int(s,    6, userId);
+    int rc = sqlite3_step(s);
+    sqlite3_finalize(s);
+    return rc == SQLITE_DONE && sqlite3_changes(db) > 0;
 }
 
 bool Database::payBill(int id, int userId) {

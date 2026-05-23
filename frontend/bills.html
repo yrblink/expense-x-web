@@ -124,6 +124,52 @@
   </div>
 </div>
 
+<!-- Edit Bill Modal -->
+<div class="modal-backdrop" id="modal-edit-bill">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Edit Bill</span>
+      <button class="modal-close" onclick="closeModal('modal-edit-bill')">×</button>
+    </div>
+    <div id="alert-edit-bill" class="alert alert-error"></div>
+    <form id="form-edit-bill" onsubmit="handleEditBill(event)">
+      <input type="hidden" id="edit-bill-id" />
+      <div class="form-group">
+        <label class="form-label" for="edit-bill-name">Bill Name</label>
+        <input class="form-control" id="edit-bill-name" type="text" placeholder="e.g. Rent, Netflix" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="edit-bill-category">Category</label>
+          <select class="form-control" id="edit-bill-category" required>
+            <option value="">Select…</option>
+            <option>Rent</option>
+            <option>Utilities</option>
+            <option>Insurance</option>
+            <option>Subscriptions</option>
+            <option>Loan</option>
+            <option>Internet</option>
+            <option>Phone</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-bill-amount">Amount Due ($)</label>
+          <input class="form-control" id="edit-bill-amount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-bill-due">Due Date</label>
+        <input class="form-control" id="edit-bill-due" type="date" required />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('modal-edit-bill')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="/js/api.js"></script>
 <script src="/js/bills.js"></script>
 </body>

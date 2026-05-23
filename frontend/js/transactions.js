@@ -6,7 +6,8 @@ const TX_CATEGORIES = {
     income:  ['Salary','Freelance','Investment','Gift','Refund','Bonus','Other'],
 };
 
-let txType = 'expense';
+let txType     = 'expense';
+let editTxType = 'expense';
 
 document.addEventListener('DOMContentLoaded', () => {
     initSidebar();
@@ -64,7 +65,8 @@ function renderTable(txList) {
               <td><span class="badge">${t.category}</span></td>
               <td class="${amountCls}">${formatMoney(t.amount)}</td>
               <td class="text-sub">${t.notes || '—'}</td>
-              <td>
+              <td style="display:flex;gap:6px;">
+                <button class="btn btn-sm" onclick='openEditTx(${JSON.stringify(t)})'>Edit</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteTx(${t.id})">Delete</button>
               </td>
             </tr>
@@ -93,6 +95,52 @@ async function handleAddTx(e) {
     document.getElementById('form-add-tx').reset();
     document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
     setTxType('expense');
+    await loadTransactions();
+}
+
+function setEditTxType(type) {
+    editTxType = type;
+    document.querySelectorAll('#form-edit-tx .type-toggle-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.type === type);
+    });
+    const select = document.getElementById('edit-tx-category');
+    if (select) {
+        select.innerHTML = '<option value="">Select…</option>' +
+            TX_CATEGORIES[type].map(c => `<option>${c}</option>`).join('');
+    }
+}
+
+function openEditTx(t) {
+    document.getElementById('edit-tx-id').value    = t.id;
+    document.getElementById('edit-tx-date').value  = t.date;
+    document.getElementById('edit-tx-amount').value = t.amount;
+    document.getElementById('edit-tx-notes').value = t.notes || '';
+    setEditTxType(t.type || 'expense');
+    const select = document.getElementById('edit-tx-category');
+    if (select) select.value = t.category;
+    hideAlert('alert-edit-tx');
+    openModal('modal-edit-tx');
+}
+
+async function handleEditTx(e) {
+    e.preventDefault();
+    hideAlert('alert-edit-tx');
+
+    const id  = parseInt(document.getElementById('edit-tx-id').value);
+    const body = {
+        date:     document.getElementById('edit-tx-date').value,
+        category: document.getElementById('edit-tx-category').value,
+        amount:   parseFloat(document.getElementById('edit-tx-amount').value),
+        notes:    document.getElementById('edit-tx-notes').value.trim(),
+        type:     editTxType,
+    };
+
+    const res = await apiPut(`/transactions/${id}`, body);
+    if (!res) return showAlert('alert-edit-tx', 'Network error');
+    const data = await res.json();
+    if (!res.ok) return showAlert('alert-edit-tx', data.error || 'Failed to save');
+
+    closeModal('modal-edit-tx');
     await loadTransactions();
 }
 

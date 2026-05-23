@@ -164,6 +164,33 @@ int main() {
         send(res, 201, {{"id", id}, {"balance", db.calculateBalance(*uid)}});
     });
 
+    svr.Put("/api/transactions/(\\d+)", [&](const httplib::Request& req, httplib::Response& res) {
+        auto uid = authedUser(req, auth);
+        if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
+
+        int txId = std::stoi(req.matches[1]);
+        auto body = json::parse(req.body, nullptr, false);
+        if (body.is_discarded() ||
+            !body.contains("date") || !body.contains("category") || !body.contains("amount"))
+            return send(res, 400, {{"error", "date, category, and amount required"}});
+
+        std::string type = body.value("type", std::string{"expense"});
+        if (type != "expense" && type != "income")
+            return send(res, 400, {{"error", "type must be 'expense' or 'income'"}});
+
+        double amount = body["amount"].get<double>();
+        if (amount <= 0) return send(res, 400, {{"error", "amount must be positive"}});
+
+        std::string notes = body.value("notes", "");
+        if (!db.updateTransaction(txId, *uid,
+                                  body["date"].get<std::string>(),
+                                  body["category"].get<std::string>(),
+                                  amount, notes, type))
+            return send(res, 404, {{"error", "Transaction not found"}});
+
+        send(res, 200, {{"ok", true}, {"balance", db.calculateBalance(*uid)}});
+    });
+
     svr.Delete("/api/transactions/(\\d+)", [&](const httplib::Request& req, httplib::Response& res) {
         auto uid = authedUser(req, auth);
         if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
@@ -207,6 +234,30 @@ int main() {
                             body["dueDate"].get<std::string>());
         if (id < 0) return send(res, 500, {{"error", "Failed to save bill"}});
         send(res, 201, {{"id", id}});
+    });
+
+    svr.Put("/api/bills/(\\d+)", [&](const httplib::Request& req, httplib::Response& res) {
+        auto uid = authedUser(req, auth);
+        if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
+
+        int billId = std::stoi(req.matches[1]);
+        auto body = json::parse(req.body, nullptr, false);
+        if (body.is_discarded() ||
+            !body.contains("name") || !body.contains("category") ||
+            !body.contains("amountDue") || !body.contains("dueDate"))
+            return send(res, 400, {{"error", "name, category, amountDue, dueDate required"}});
+
+        double amountDue = body["amountDue"].get<double>();
+        if (amountDue <= 0) return send(res, 400, {{"error", "amountDue must be positive"}});
+
+        if (!db.updateBill(billId, *uid,
+                           body["name"].get<std::string>(),
+                           body["category"].get<std::string>(),
+                           amountDue,
+                           body["dueDate"].get<std::string>()))
+            return send(res, 404, {{"error", "Bill not found"}});
+
+        send(res, 200, {{"ok", true}});
     });
 
     svr.Put("/api/bills/(\\d+)/pay", [&](const httplib::Request& req, httplib::Response& res) {
