@@ -13,6 +13,8 @@
 
 # Build output
 out/
+build/
+/expensex
 
 # Visual Studio
 .vs/

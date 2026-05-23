@@ -48,7 +48,9 @@ function renderBills(bills) {
           </div>
           <div class="bill-amount">${formatMoney(b.amountDue)}</div>
           <div class="bill-actions">
-            ${!b.isPaid ? `<button class="btn btn-success btn-sm" onclick="markPaid(${b.id})">Mark Paid</button>` : ''}
+            ${b.isPaid
+                ? `<button class="btn btn-sm" onclick="markUnpaid(${b.id})">Mark Unpaid</button>`
+                : `<button class="btn btn-success btn-sm" onclick="markPaid(${b.id})">Mark Paid</button>`}
             <button class="btn btn-danger btn-sm" onclick="deleteBill(${b.id})">Delete</button>
           </div>
         </div>
@@ -78,6 +80,12 @@ async function handleAddBill(e) {
 
 async function markPaid(id) {
     const res = await apiPut(`/bills/${id}/pay`, {});
+    if (res && res.ok) await loadBills();
+    else showAlert('alert-bills', 'Failed to update bill');
+}
+
+async function markUnpaid(id) {
+    const res = await apiPut(`/bills/${id}/unpay`, {});
     if (res && res.ok) await loadBills();
     else showAlert('alert-bills', 'Failed to update bill');
 }

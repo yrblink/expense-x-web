@@ -268,6 +268,12 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   gap: 16px;
   margin-bottom: 28px;
 }
+.stat-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 900px) {
+  .stat-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
 .stat-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -539,6 +545,86 @@ select.form-control option { background: var(--surface2); }
 .progress-fill.warn   { background: var(--yellow); }
 .progress-fill.over   { background: var(--red); }
 .budget-pct { font-size: 12px; font-weight: 600; }
+
+/* ── Balance Breakdown ──────────────────────────────────────────────────────── */
+.balance-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.breakdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+.breakdown-label {
+  font-size: 14px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.breakdown-op {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--surface2);
+  color: var(--subtext);
+  font-size: 13px;
+  font-weight: 700;
+}
+.breakdown-value {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.breakdown-value.green { color: var(--green); }
+.breakdown-value.red   { color: var(--red); }
+.breakdown-total .breakdown-label { font-weight: 700; }
+.breakdown-total .breakdown-value { font-size: 18px; font-weight: 800; }
+.breakdown-total .breakdown-op { background: var(--accent); color: #ffffff; }
+.breakdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 6px 0;
+}
+
+/* ── Transaction type toggle ────────────────────────────────────────────────── */
+.type-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+.type-toggle-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--subtext);
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: background 0.15s, color 0.15s;
+}
+.type-toggle-btn.active.type-expense {
+  background: var(--surface);
+  color: var(--red);
+  box-shadow: var(--shadow-sm);
+}
+.type-toggle-btn.active.type-income {
+  background: var(--surface);
+  color: var(--green);
+  box-shadow: var(--shadow-sm);
+}
+.amount-positive::before { content: '+'; }
+.amount-negative::before { content: '−'; }
 
 /* ── Balance summary bar ────────────────────────────────────────────────────── */
 .summary-bar {

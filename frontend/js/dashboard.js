@@ -1,11 +1,12 @@
 requireAuth();
 
 const CHART_COLORS = [
-    '#89b4fa','#a6e3a1','#fab387','#f38ba8',
-    '#cba6f7','#f9e2af','#94e2d5','#89dceb',
+    '#1677ff','#52c41a','#fa8c16','#ff4d4f',
+    '#722ed1','#faad14','#13c2c2','#eb2f96',
 ];
 
 let chart = null;
+let lastSummary = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     initSidebar();
@@ -22,25 +23,36 @@ async function loadDashboard() {
 
     const summary = await summaryRes.json();
     const txData  = await txRes.json();
+    lastSummary = summary;
 
     // Stat cards
-    document.getElementById('stat-balance').textContent = formatMoney(summary.balance);
-    document.getElementById('stat-spent').textContent   = formatMoney(summary.totalSpent);
-    document.getElementById('stat-bills').textContent   = formatMoney(summary.billsDue);
+    setText('stat-balance', formatMoney(summary.balance));
+    setText('stat-income',  formatMoney(summary.monthlyIncome));
+    setText('stat-spent',   formatMoney(summary.totalSpent));
+    setText('stat-bills',   formatMoney(summary.billsDue));
 
-    // Projected balance row
-    document.getElementById('proj-balance').textContent = formatMoney(summary.balance);
-    document.getElementById('proj-bills').textContent   = formatMoney(summary.billsDue);
-    const after = summary.balanceAfterBills;
-    const afterEl = document.getElementById('proj-after');
-    afterEl.textContent = formatMoney(after);
-    afterEl.style.color = after < 0 ? 'var(--red)' : 'var(--green)';
+    // Balance breakdown
+    setText('bd-start',    formatMoney(summary.startingBalance));
+    setText('bd-income',   formatMoney(summary.allTimeIncome));
+    setText('bd-expenses', formatMoney(summary.allTimeExpenses));
+    setText('bd-paid',     formatMoney(summary.allTimePaidBills));
+    setText('bd-current',  formatMoney(summary.balance));
+    setText('bd-unpaid',   formatMoney(summary.billsDue));
+
+    const afterEl = document.getElementById('bd-after');
+    afterEl.textContent = formatMoney(summary.balanceAfterBills);
+    afterEl.style.color = summary.balanceAfterBills < 0 ? 'var(--red)' : 'var(--green)';
 
     // Spending chart
     renderChart(summary.byCategory);
 
     // Recent transactions (last 5)
     renderRecentTx(txData.slice(0, 5));
+}
+
+function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
 }
 
 function renderChart(byCategory) {
@@ -58,6 +70,7 @@ function renderChart(byCategory) {
 
     if (chart) chart.destroy();
 
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     chart = new Chart(canvas, {
         type: 'doughnut',
         data: {
@@ -74,7 +87,11 @@ function renderChart(byCategory) {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { color: '#a6adc8', padding: 12, font: { size: 12 } },
+                    labels: {
+                        color: isDark ? '#8b93b0' : '#8c93ab',
+                        padding: 12,
+                        font: { size: 12 },
+                    },
                 },
                 tooltip: {
                     callbacks: {
@@ -92,20 +109,29 @@ function renderRecentTx(txList) {
         tbody.innerHTML = '<tr><td colspan="4" class="text-center text-sub" style="padding:24px;">No transactions yet</td></tr>';
         return;
     }
-    tbody.innerHTML = txList.map(t => `
-        <tr>
-          <td>${t.date}</td>
-          <td><span class="badge">${t.category}</span></td>
-          <td class="amount-negative">${formatMoney(t.amount)}</td>
-          <td class="text-sub">${t.notes || '—'}</td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = txList.map(t => {
+        const cls = t.type === 'income' ? 'amount-positive' : 'amount-negative';
+        return `
+            <tr>
+              <td>${t.date}</td>
+              <td><span class="badge">${t.category}</span></td>
+              <td class="${cls}">${formatMoney(t.amount)}</td>
+              <td class="text-sub">${t.notes || '—'}</td>
+            </tr>
+        `;
+    }).join('');
 }
 
-async function saveBalance() {
+function openBalanceModal() {
+    const input = document.getElementById('input-balance');
+    if (input && lastSummary) input.value = lastSummary.startingBalance.toFixed(2);
+    openModal('modal-balance');
+}
+
+async function saveStartingBalance() {
     const val = parseFloat(document.getElementById('input-balance').value);
-    if (isNaN(val) || val < 0) return;
-    const res = await apiPut('/user/balance', { balance: val });
+    if (isNaN(val)) return;
+    const res = await apiPut('/user/starting_balance', { startingBalance: val });
     if (res && res.ok) {
         closeModal('modal-balance');
         await loadDashboard();

@@ -61,13 +61,14 @@
       <table class="data-table">
         <thead><tr>
           <th>Date</th>
+          <th>Type</th>
           <th>Category</th>
           <th>Amount</th>
           <th>Notes</th>
           <th></th>
         </tr></thead>
         <tbody id="tx-tbody">
-          <tr><td colspan="5" class="text-center"><div class="spinner"></div></td></tr>
+          <tr><td colspan="6" class="text-center"><div class="spinner"></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -83,6 +84,10 @@
     </div>
     <div id="alert-modal" class="alert alert-error"></div>
     <form id="form-add-tx" onsubmit="handleAddTx(event)">
+      <div class="type-toggle">
+        <button type="button" class="type-toggle-btn type-expense active" data-type="expense" onclick="setTxType('expense')">Expense</button>
+        <button type="button" class="type-toggle-btn type-income"          data-type="income"  onclick="setTxType('income')">Income</button>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="tx-date">Date</label>
@@ -92,16 +97,6 @@
           <label class="form-label" for="tx-category">Category</label>
           <select class="form-control" id="tx-category" required>
             <option value="">Select…</option>
-            <option>Groceries</option>
-            <option>Transportation</option>
-            <option>Dining Out</option>
-            <option>Entertainment</option>
-            <option>Utilities</option>
-            <option>Healthcare</option>
-            <option>Shopping</option>
-            <option>Education</option>
-            <option>Personal Care</option>
-            <option>Other</option>
           </select>
         </div>
       </div>
@@ -115,7 +110,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn" onclick="closeModal('modal-add-tx')">Cancel</button>
-        <button type="submit" class="btn btn-primary">Add</button>
+        <button type="submit" class="btn btn-primary" id="btn-tx-submit">Add Expense</button>
       </div>
     </form>
   </div>

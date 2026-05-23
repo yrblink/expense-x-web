@@ -54,17 +54,18 @@
   <main class="main-content">
     <div class="page-header">
       <h1 class="page-title">Dashboard</h1>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span class="text-sub" style="font-size:13px;">Balance:</span>
-        <button class="btn btn-primary btn-sm" onclick="openModal('modal-balance')">Update Balance</button>
-      </div>
+      <button class="btn btn-primary btn-sm" onclick="openBalanceModal()">Set Starting Balance</button>
     </div>
 
     <!-- Stat cards -->
-    <div class="stat-grid">
+    <div class="stat-grid stat-grid-4">
       <div class="stat-card">
         <div class="stat-card-label">Current Balance</div>
         <div class="stat-card-value green" id="stat-balance">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Income This Month</div>
+        <div class="stat-card-value green" id="stat-income">—</div>
       </div>
       <div class="stat-card">
         <div class="stat-card-label">Spent This Month</div>
@@ -102,43 +103,62 @@
       </div>
     </div>
 
-    <!-- Balance after bills -->
+    <!-- Balance breakdown + projection -->
     <div class="panel mt-24" style="margin-top:20px;">
-      <div class="panel-title">Projected Balance</div>
-      <div style="display:flex;gap:48px;flex-wrap:wrap;">
-        <div>
-          <div style="font-size:12px;color:var(--subtext);margin-bottom:4px;">Current Balance</div>
-          <div style="font-size:20px;font-weight:700;" id="proj-balance">—</div>
+      <div class="panel-title">Balance Breakdown</div>
+      <div class="balance-breakdown">
+        <div class="breakdown-row">
+          <span class="breakdown-label">Starting Balance</span>
+          <span class="breakdown-value" id="bd-start">—</span>
         </div>
-        <div style="display:flex;align-items:center;font-size:22px;color:var(--subtext);">−</div>
-        <div>
-          <div style="font-size:12px;color:var(--subtext);margin-bottom:4px;">Unpaid Bills Total</div>
-          <div style="font-size:20px;font-weight:700;color:var(--red);" id="proj-bills">—</div>
+        <div class="breakdown-row">
+          <span class="breakdown-label"><span class="breakdown-op">+</span> Total Income</span>
+          <span class="breakdown-value green" id="bd-income">—</span>
         </div>
-        <div style="display:flex;align-items:center;font-size:22px;color:var(--subtext);">=</div>
-        <div>
-          <div style="font-size:12px;color:var(--subtext);margin-bottom:4px;">After Bills</div>
-          <div style="font-size:20px;font-weight:700;" id="proj-after">—</div>
+        <div class="breakdown-row">
+          <span class="breakdown-label"><span class="breakdown-op">−</span> Total Expenses</span>
+          <span class="breakdown-value red" id="bd-expenses">—</span>
+        </div>
+        <div class="breakdown-row">
+          <span class="breakdown-label"><span class="breakdown-op">−</span> Paid Bills</span>
+          <span class="breakdown-value red" id="bd-paid">—</span>
+        </div>
+        <div class="breakdown-row breakdown-total">
+          <span class="breakdown-label"><span class="breakdown-op">=</span> Current Balance</span>
+          <span class="breakdown-value" id="bd-current">—</span>
+        </div>
+        <div class="breakdown-divider"></div>
+        <div class="breakdown-row">
+          <span class="breakdown-label"><span class="breakdown-op">−</span> Unpaid Bills</span>
+          <span class="breakdown-value red" id="bd-unpaid">—</span>
+        </div>
+        <div class="breakdown-row breakdown-total">
+          <span class="breakdown-label"><span class="breakdown-op">=</span> After Bills</span>
+          <span class="breakdown-value" id="bd-after">—</span>
         </div>
       </div>
     </div>
   </main>
 </div>
 
-<!-- Update Balance Modal -->
+<!-- Set Starting Balance Modal -->
 <div class="modal-backdrop" id="modal-balance">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Update Balance</span>
+      <span class="modal-title">Set Starting Balance</span>
       <button class="modal-close" onclick="closeModal('modal-balance')">×</button>
     </div>
+    <p class="text-sub" style="font-size:13px;margin-bottom:18px;line-height:1.5;">
+      Your starting balance is what you had when you began tracking with ExpenseX.
+      Your current balance is calculated from this — plus income, minus expenses and paid bills.
+    </p>
     <div class="form-group">
-      <label class="form-label" for="input-balance">Available Balance ($)</label>
-      <input class="form-control" id="input-balance" type="number" step="0.01" min="0" placeholder="e.g. 2400.00" />
+      <label class="form-label" for="input-balance">Starting Balance ($)</label>
+      <input class="form-control" id="input-balance" type="number" step="0.01" placeholder="e.g. 2400.00" />
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('modal-balance')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveBalance()">Save</button>
+      <button class="btn btn-primary" onclick="saveStartingBalance()">Save</button>
     </div>
   </div>
 </div>
