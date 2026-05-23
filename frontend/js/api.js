@@ -1,5 +1,44 @@
 const API = 'http://localhost:8080/api';
 
+// ── Theme ─────────────────────────────────────────────────────────────────────
+function initTheme() {
+    const theme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    _updateThemeButtons(next);
+}
+
+function _updateThemeButtons(theme) {
+    document.querySelectorAll('[id="btn-theme-toggle"]').forEach(btn => {
+        const label = btn.querySelector('.theme-label');
+        const iconMoon = btn.querySelector('.icon-moon');
+        const iconSun  = btn.querySelector('.icon-sun');
+        if (label)    label.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        if (iconMoon) iconMoon.style.display = theme === 'dark' ? '' : 'none';
+        if (iconSun)  iconSun.style.display  = theme === 'dark' ? 'none' : '';
+    });
+}
+
+// Apply theme immediately on script load to avoid flash of wrong theme.
+// Button icon state is set after DOM is ready.
+initTheme();
+document.addEventListener('DOMContentLoaded', () => {
+    const theme = localStorage.getItem('theme') || 'dark';
+    _updateThemeButtons(theme);
+    document.querySelectorAll('[id="btn-theme-toggle"]').forEach(btn => {
+        if (!btn.dataset.wired) {
+            btn.dataset.wired = '1';
+            btn.addEventListener('click', toggleTheme);
+        }
+    });
+});
+
 // ── Storage helpers ───────────────────────────────────────────────────────────
 function getToken()    { return localStorage.getItem('token'); }
 function getUsername() { return localStorage.getItem('username'); }
@@ -68,10 +107,13 @@ function hideAlert(elId) {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// Populate sidebar username, wire up logout, and set up collapse toggle.
+// Populate sidebar username, wire up logout, collapse toggle, and theme toggle.
 function initSidebar() {
     const nameEl = document.getElementById('sidebar-username');
     if (nameEl) nameEl.textContent = getUsername() || '';
+
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    _updateThemeButtons(currentTheme);
 
     document.getElementById('btn-logout')?.addEventListener('click', async () => {
         await apiPost('/logout', {});
