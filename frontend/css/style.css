@@ -14,6 +14,21 @@
   --purple:   #cba6f7;
 }
 
+[data-theme="light"] {
+  --bg:       #f5f5f7;
+  --surface:  #ffffff;
+  --surface2: #eef0f3;
+  --border:   #d9dce3;
+  --text:     #111827;
+  --subtext:  #6b7280;
+  --accent:   #2563eb;
+  --green:    #16a34a;
+  --yellow:   #b45309;
+  --red:      #dc2626;
+  --peach:    #ea580c;
+  --purple:   #7c3aed;
+}
+
 /* ── Reset ──────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -124,6 +139,39 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   transition: border-color 0.15s, color 0.15s;
 }
 .btn-logout:hover { border-color: var(--red); color: var(--red); }
+.btn-theme-toggle {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--subtext);
+  padding: 8px;
+  border-radius: 8px;
+  transition: border-color 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.btn-theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.btn-theme-toggle-auth {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--subtext);
+  border-radius: 8px;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  transition: border-color 0.15s, color 0.15s;
+  z-index: 10;
+}
+.btn-theme-toggle-auth:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ── Main Content ───────────────────────────────────────────────────────────── */
 .main-content {
