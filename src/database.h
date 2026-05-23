@@ -64,6 +64,7 @@ public:
                                                     const std::string& category,
                                                     double amount, const std::string& notes);
     std::vector<TransactionRecord>   getTransactions(int userId);
+    std::optional<TransactionRecord> getTransaction(int id, int userId);
     bool                             deleteTransaction(int id, int userId);
 
     // Bills

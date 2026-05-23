@@ -140,14 +140,20 @@ int main() {
             !body.contains("date") || !body.contains("category") || !body.contains("amount"))
             return send(res, 400, {{"error", "date, category, and amount required"}});
 
+        double amount = body["amount"].get<double>();
         std::string notes = body.value("notes", "");
         int id = db.addTransaction(*uid,
                                    body["date"].get<std::string>(),
                                    body["category"].get<std::string>(),
-                                   body["amount"].get<double>(),
+                                   amount,
                                    notes);
         if (id < 0) return send(res, 500, {{"error", "Failed to save transaction"}});
-        send(res, 201, {{"id", id}});
+
+        auto user = db.findUserById(*uid);
+        double newBalance = (user ? user->balance : 0.0) - amount;
+        db.updateBalance(*uid, newBalance);
+
+        send(res, 201, {{"id", id}, {"balance", newBalance}});
     });
 
     svr.Delete("/api/transactions/(\\d+)", [&](const httplib::Request& req, httplib::Response& res) {
@@ -155,9 +161,16 @@ int main() {
         if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
 
         int txId = std::stoi(req.matches[1]);
-        if (!db.deleteTransaction(txId, *uid))
-            return send(res, 404, {{"error", "Transaction not found"}});
-        send(res, 200, {{"ok", true}});
+        auto tx  = db.getTransaction(txId, *uid);
+        if (!tx) return send(res, 404, {{"error", "Transaction not found"}});
+
+        db.deleteTransaction(txId, *uid);
+
+        auto user = db.findUserById(*uid);
+        double newBalance = (user ? user->balance : 0.0) + tx->amount;
+        db.updateBalance(*uid, newBalance);
+
+        send(res, 200, {{"ok", true}, {"balance", newBalance}});
     });
 
     // ── Bills ─────────────────────────────────────────────────────────────────

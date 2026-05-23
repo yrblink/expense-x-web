@@ -47,7 +47,32 @@ input, select, textarea { font-family: inherit; font-size: 14px; }
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow: hidden;
+  transition: width 0.25s ease;
 }
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--subtext);
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 14px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.sidebar-toggle:hover { color: var(--text); border-color: var(--accent); }
+.sidebar.collapsed { width: 60px; }
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .sidebar-logo-text,
+.sidebar.collapsed .sidebar-footer { display: none; }
+.sidebar.collapsed .nav-list li a { justify-content: center; padding: 10px 0; }
+.sidebar.collapsed .sidebar-logo { justify-content: center; }
+.sidebar.collapsed .sidebar-toggle { margin: 0 auto; }
 .sidebar-logo {
   display: flex;
   align-items: center;

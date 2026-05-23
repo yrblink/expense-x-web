@@ -68,7 +68,7 @@ function hideAlert(elId) {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// Populate sidebar username and wire up logout button.
+// Populate sidebar username, wire up logout, and set up collapse toggle.
 function initSidebar() {
     const nameEl = document.getElementById('sidebar-username');
     if (nameEl) nameEl.textContent = getUsername() || '';
@@ -78,4 +78,18 @@ function initSidebar() {
         clearSession();
         window.location.replace('/index.html');
     });
+
+    const sidebar   = document.querySelector('.sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    if (sidebar && toggleBtn) {
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            sidebar.classList.add('collapsed');
+            toggleBtn.textContent = '›';
+        }
+        toggleBtn.addEventListener('click', () => {
+            const collapsed = sidebar.classList.toggle('collapsed');
+            toggleBtn.textContent = collapsed ? '›' : '‹';
+            localStorage.setItem('sidebarCollapsed', String(collapsed));
+        });
+    }
 }

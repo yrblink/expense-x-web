@@ -165,6 +165,30 @@ std::vector<TransactionRecord> Database::getTransactions(int userId) {
     return out;
 }
 
+std::optional<TransactionRecord> Database::getTransaction(int id, int userId) {
+    sqlite3_stmt* s;
+    sqlite3_prepare_v2(db,
+        "SELECT id, date, category, amount, notes, created_at "
+        "FROM transactions WHERE id = ? AND user_id = ?",
+        -1, &s, nullptr);
+    sqlite3_bind_int(s, 1, id);
+    sqlite3_bind_int(s, 2, userId);
+    if (sqlite3_step(s) == SQLITE_ROW) {
+        TransactionRecord t;
+        t.id        = sqlite3_column_int(s, 0);
+        t.date      = reinterpret_cast<const char*>(sqlite3_column_text(s, 1));
+        t.category  = reinterpret_cast<const char*>(sqlite3_column_text(s, 2));
+        t.amount    = sqlite3_column_double(s, 3);
+        auto* n     = sqlite3_column_text(s, 4);
+        t.notes     = n ? reinterpret_cast<const char*>(n) : "";
+        t.createdAt = reinterpret_cast<const char*>(sqlite3_column_text(s, 5));
+        sqlite3_finalize(s);
+        return t;
+    }
+    sqlite3_finalize(s);
+    return std::nullopt;
+}
+
 bool Database::deleteTransaction(int id, int userId) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db, "DELETE FROM transactions WHERE id = ? AND user_id = ?", -1, &s, nullptr);
