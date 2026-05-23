@@ -2,7 +2,7 @@ const API = 'http://localhost:8080/api';
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 function initTheme() {
-    const theme = localStorage.getItem('theme') || 'dark';
+    const theme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', theme);
 }
 
@@ -29,7 +29,7 @@ function _updateThemeButtons(theme) {
 // Button icon state is set after DOM is ready.
 initTheme();
 document.addEventListener('DOMContentLoaded', () => {
-    const theme = localStorage.getItem('theme') || 'dark';
+    const theme = localStorage.getItem('theme') || 'light';
     _updateThemeButtons(theme);
     document.querySelectorAll('[id="btn-theme-toggle"]').forEach(btn => {
         if (!btn.dataset.wired) {
@@ -112,7 +112,7 @@ function initSidebar() {
     const nameEl = document.getElementById('sidebar-username');
     if (nameEl) nameEl.textContent = getUsername() || '';
 
-    const currentTheme = localStorage.getItem('theme') || 'dark';
+    const currentTheme = localStorage.getItem('theme') || 'light';
     _updateThemeButtons(currentTheme);
 
     document.getElementById('btn-logout')?.addEventListener('click', async () => {
