@@ -1,43 +1,45 @@
 # ExpenseX
 
-A personal finance tracker built with a C++ backend and a vanilla JS frontend. Track your spending, manage recurring bills, and set monthly budgets — all from a clean web UI served locally.
+A personal finance tracker with a C++ backend and a vanilla JS frontend, backed by SQLite. Runs locally on Windows. You add transactions, track recurring bills, and set per-category budgets; the dashboard shows where you stand.
 
 ## Features
 
-- **Dashboard** — spending overview, category breakdown chart, recent transactions, and projected balance after bills
-- **Transactions** — log expenses by date, category, and amount with optional notes
-- **Bills** — track recurring bills, mark them as paid, and see how much is still owed
-- **Budgets** — set monthly spending limits per category and track progress against them
-- **Auth** — per-user accounts with salted password hashing and session tokens
+The dashboard pulls the picture together in one screen: current balance, monthly income and spending, a category breakdown, recent transactions, and an upcoming-bills strip sorted by due date. Balance is derived (starting balance plus income, minus expenses and paid bills), so editing a transaction or your starting balance recomputes the number on the next request.
 
-## Tech Stack
+The Balance Breakdown panel has two views: horizontal bars or a pie chart. Pick whichever reads better at the moment.
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | C++17, [cpp-httplib](https://github.com/yhirose/cpp-httplib) |
-| Database | SQLite3 (bundled) |
-| JSON | [nlohmann/json](https://github.com/nlohmann/json) (bundled) |
+Transactions take a date, category, amount, type (expense or income), and notes. Edit and delete inline.
+
+Bills work the same way: name, category, amount, due date. Mark them paid or unpaid as you go. Unpaid ones show up on the dashboard with overdue, due-soon, and later states.
+
+Budgets live per-category with a weekly or monthly period. The budgets page shows a wheel with overall usage and a table of each budget's progress.
+
+Authentication is per-user. Passwords get a random salt before SHA-256 hashing. Sessions sit in memory, so a server restart logs everyone out. That's fine for a single-user local app and risky if you ever expose it to a network.
+
+A light/dark theme toggle persists per browser. The layout reflows for narrow viewports: the sidebar collapses to icons under 1100px and becomes a top bar on phones.
+
+## Tech stack
+
+| Layer    | Tech |
+|----------|------|
+| Backend  | C++17, [cpp-httplib](https://github.com/yhirose/cpp-httplib) |
+| Database | SQLite3, bundled |
+| JSON     | [nlohmann/json](https://github.com/nlohmann/json), bundled |
 | Frontend | Vanilla HTML/CSS/JS, [Chart.js](https://www.chartjs.org/) |
-| Build | CMake 3.16+ |
+| Fonts    | Barlow Condensed (display), Figtree (body) |
+| Build    | CMake 3.16+ |
 
-No external dependencies need to be installed — everything is either bundled in `src/libs/` or linked from Windows system libraries.
+Nothing external needs installing. Everything is either bundled under `src/libs/` or linked from Windows system libraries.
 
-## Getting Started
+## Getting started
 
-### Prerequisites
+You need Windows 10 or 11 plus [Visual Studio 2022](https://visualstudio.microsoft.com/) with the *Desktop development with C++* workload. CMake with MSVC or MinGW works too.
 
-- Windows 10/11
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) with the **Desktop development with C++** workload, **or** CMake + MSVC/MinGW
+### Visual Studio
 
-### Option 1 — Visual Studio (recommended)
+Open the folder. Visual Studio picks up `CMakeLists.txt` and configures itself. Choose the x64-Debug configuration, build with Ctrl+Shift+B, run with F5.
 
-1. Open Visual Studio → **File → Open → Folder** → select this repo
-2. Visual Studio auto-detects `CMakeLists.txt` and configures the project
-3. Select the **x64-Debug** configuration from the toolbar
-4. Press **Ctrl+Shift+B** to build
-5. Press **F5** to run
-
-### Option 2 — CMake CLI
+### CMake CLI
 
 ```powershell
 cmake -B out/build/x64-Debug -S .
@@ -45,61 +47,28 @@ cmake --build out/build/x64-Debug
 .\expensex.exe
 ```
 
-### Running
+Run the server from the project root so it can find `./frontend`. The SQLite file (`expensex.db`) is created on first launch, and schema upgrades apply automatically on startup. Then open `http://localhost:8080`.
 
-Start the server from the project root:
-
-```powershell
-.\expensex.exe
-```
-
-Then open your browser to `http://localhost:8080`.
-
-The server must be run from the project root so it can locate the `./frontend` directory. The SQLite database (`expensex.db`) is created automatically on first run.
-
-## Project Structure
+## Project structure
 
 ```
 ├── src/
-│   ├── main.cpp          # HTTP server, route definitions
-│   ├── database.cpp/h    # SQLite wrapper
-│   ├── auth.cpp/h        # Session management, password hashing
+│   ├── main.cpp          # HTTP server, routes
+│   ├── database.cpp/h    # SQLite wrapper, schema + migrations
+│   ├── auth.cpp/h        # Sessions, password hashing
 │   ├── sha256.h          # SHA-256 implementation
-│   └── libs/             # Bundled: sqlite3, httplib, json.hpp
+│   └── libs/             # sqlite3, httplib, json.hpp
 ├── frontend/
-│   ├── index.html        # Login / Register
+│   ├── index.html        # Login / register
 │   ├── dashboard.html
 │   ├── transactions.html
 │   ├── bills.html
 │   ├── budgets.html
-│   ├── css/style.css
-│   └── js/               # One JS file per page + shared api.js
+│   ├── css/style.css     # Single sheet, themed via CSS variables
+│   └── js/               # One file per page + shared api.js
 └── CMakeLists.txt
 ```
 
-## API Overview
-
-All endpoints (except `/api/register` and `/api/login`) require an `Authorization: Bearer <token>` header.
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/register` | Create account |
-| POST | `/api/login` | Sign in, returns token |
-| POST | `/api/logout` | Invalidate token |
-| GET | `/api/user` | Get current user info |
-| PUT | `/api/user/balance` | Update balance |
-| GET/POST | `/api/transactions` | List or add transactions |
-| DELETE | `/api/transactions/:id` | Delete a transaction |
-| GET/POST | `/api/bills` | List or add bills |
-| PUT | `/api/bills/:id/pay` | Mark bill as paid |
-| DELETE | `/api/bills/:id` | Delete a bill |
-| GET/POST | `/api/budgets` | List or set budgets |
-| DELETE | `/api/budgets/:id` | Delete a budget |
-| GET | `/api/summary` | Dashboard summary data |
-
 ## Notes
 
-- Sessions are stored in memory and are cleared on server restart
-- Passwords are hashed with SHA-256 + a random salt per user
-- The app runs over plain HTTP — not recommended for use on a public network without adding HTTPS (e.g. via a reverse proxy like Caddy or Nginx)
-- No bank connectivity — all data is entered manually
+The app speaks plain HTTP. Put it behind a TLS proxy like Caddy or Nginx if you want it reachable beyond localhost. No bank connectivity and no third-party APIs: every transaction is one you typed in yourself.
