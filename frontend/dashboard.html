@@ -7,51 +7,56 @@
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/style.css?v=5" />
 </head>
 <body>
 <div class="app-layout">
 
-  <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <a href="/dashboard.html" class="sidebar-logo-text">ExpenseX</a>
-      <button class="sidebar-toggle" id="sidebar-toggle">‹</button>
+    <div class="sidebar-brand">
+      <a href="/dashboard.html" class="sidebar-brand-text">Expense<span class="x">X</span></a>
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">‹</button>
     </div>
-    <ul class="nav-list">
+    <ul class="sidebar-nav">
       <li><a href="/dashboard.html" class="active">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         <span class="nav-label">Dashboard</span>
       </a></li>
       <li><a href="/transactions.html">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
         <span class="nav-label">Transactions</span>
       </a></li>
       <li><a href="/bills.html">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span class="nav-label">Bills</span>
       </a></li>
       <li><a href="/budgets.html">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <span class="nav-label">Budgets</span>
       </a></li>
     </ul>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div class="sidebar-foot">
+      <div class="sidebar-foot-user">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span id="sidebar-username"></span>
       </div>
-      <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="Toggle color theme">
-        <svg class="icon-moon" style="display:none" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <span class="theme-label">Dark Mode</span>
-      </button>
-      <button class="btn-logout" id="btn-logout">Sign Out</button>
+      <div class="sidebar-foot-row">
+        <button class="btn-icon theme-toggle" id="btn-theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-moon" style="display:none" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn-logout" id="btn-logout">Sign Out</button>
+      </div>
     </div>
   </aside>
 
-  <!-- Main content -->
   <main class="main-content">
+
+    <!-- Simple brand mark above balance -->
+    <div class="brand-mark">
+      <span class="brand-mark-text">Expense<span class="x">X</span></span>
+      <div class="brand-mark-rule"></div>
+    </div>
 
     <!-- Hero Balance -->
     <div class="hero-balance">
@@ -59,7 +64,7 @@
         <div class="hero-balance-label">Current Balance</div>
         <div class="hero-balance-value green" id="stat-balance">—</div>
       </div>
-      <button class="btn" style="margin-bottom:8px;" onclick="openBalanceModal()">Set Starting Balance</button>
+      <button class="btn" onclick="openBalanceModal()">Set Starting Balance</button>
     </div>
 
     <!-- KPI row -->
@@ -92,56 +97,95 @@
           Recent Transactions
           <a href="/transactions.html">View all →</a>
         </div>
-        <table class="data-table">
-          <thead><tr>
-            <th>Date</th><th>Category</th><th>Amount</th><th>Notes</th>
-          </tr></thead>
-          <tbody id="recent-tbody">
-            <tr><td colspan="4" class="text-center"><div class="spinner"></div></td></tr>
-          </tbody>
-        </table>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Date</th><th>Category</th><th>Amount</th><th>Notes</th>
+            </tr></thead>
+            <tbody id="recent-tbody">
+              <tr><td colspan="4" class="text-center"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming Bills -->
+    <div class="panel standalone" style="margin-bottom:24px;">
+      <div class="panel-title">
+        Upcoming Bills
+        <a href="/bills.html">Manage →</a>
+      </div>
+      <div id="upcoming-list" class="upcoming-list">
+        <div class="text-center" style="padding:32px;"><div class="spinner"></div></div>
       </div>
     </div>
 
     <!-- Balance breakdown -->
     <div class="panel standalone">
-      <div class="panel-title">Balance Breakdown</div>
-      <div class="ledger">
-        <div class="ledger-row">
-          <span class="ledger-op ledger-op-neutral">↑</span>
-          <span class="ledger-label">Starting Balance</span>
-          <span class="ledger-value" id="bd-start">—</span>
-        </div>
-        <div class="ledger-row">
-          <span class="ledger-op ledger-op-add">+</span>
-          <span class="ledger-label">Total Income</span>
-          <span class="ledger-value green" id="bd-income">—</span>
-        </div>
-        <div class="ledger-row">
-          <span class="ledger-op ledger-op-sub">−</span>
-          <span class="ledger-label">Total Expenses</span>
-          <span class="ledger-value red" id="bd-expenses">—</span>
-        </div>
-        <div class="ledger-row">
-          <span class="ledger-op ledger-op-sub">−</span>
-          <span class="ledger-label">Paid Bills</span>
-          <span class="ledger-value red" id="bd-paid">—</span>
+      <div class="panel-title">
+        Balance Breakdown
+        <div class="view-toggle">
+          <button type="button" class="view-toggle-btn active" data-view="pie" onclick="setBreakdownView('pie')">Pie</button>
+          <button type="button" class="view-toggle-btn"        data-view="bar" onclick="setBreakdownView('bar')">Bar</button>
         </div>
       </div>
-      <div class="ledger-subtotal">
-        <span class="ledger-subtotal-label">Current Balance</span>
-        <span class="ledger-subtotal-value" id="bd-current">—</span>
-      </div>
-      <div class="ledger">
-        <div class="ledger-row">
-          <span class="ledger-op ledger-op-sub">−</span>
-          <span class="ledger-label">Unpaid Bills</span>
-          <span class="ledger-value red" id="bd-unpaid">—</span>
+
+      <!-- Bar view -->
+      <div class="breakdown-view" id="view-bar" hidden>
+        <div class="breakdown-chart" id="breakdown-chart">
+          <div class="breakdown-row">
+            <span class="breakdown-label"><span class="op">↑</span>Starting</span>
+            <div class="breakdown-track"><div class="breakdown-fill base" id="bar-start"></div></div>
+            <span class="breakdown-value" id="bd-start">—</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label"><span class="op add">+</span>Income</span>
+            <div class="breakdown-track"><div class="breakdown-fill add" id="bar-income"></div></div>
+            <span class="breakdown-value green" id="bd-income">—</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label"><span class="op sub">−</span>Expenses</span>
+            <div class="breakdown-track"><div class="breakdown-fill sub" id="bar-expenses"></div></div>
+            <span class="breakdown-value red" id="bd-expenses">—</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label"><span class="op sub">−</span>Paid Bills</span>
+            <div class="breakdown-track"><div class="breakdown-fill sub" id="bar-paid"></div></div>
+            <span class="breakdown-value red" id="bd-paid">—</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="breakdown-label"><span class="op sub">−</span>Unpaid Bills</span>
+            <div class="breakdown-track"><div class="breakdown-fill sub" id="bar-unpaid"></div></div>
+            <span class="breakdown-value red" id="bd-unpaid">—</span>
+          </div>
         </div>
       </div>
-      <div class="ledger-final">
-        <span class="ledger-final-label">Balance After Bills</span>
-        <span class="ledger-final-value" id="bd-after">—</span>
+
+      <!-- Pie view -->
+      <div class="breakdown-view" id="view-pie">
+        <div class="breakdown-pie-wrap">
+          <div class="breakdown-pie-canvas-wrap">
+            <canvas id="breakdown-pie"></canvas>
+            <div class="breakdown-pie-center">
+              <div class="breakdown-pie-center-label">After Bills</div>
+              <div class="breakdown-pie-center-value" id="bd-after-pie">—</div>
+            </div>
+          </div>
+          <div class="breakdown-pie-legend" id="breakdown-pie-legend"></div>
+        </div>
+      </div>
+
+      <!-- Totals (shared between views) -->
+      <div class="breakdown-totals">
+        <div class="breakdown-total">
+          <div class="breakdown-total-label">Current Balance</div>
+          <div class="breakdown-total-value" id="bd-current">—</div>
+        </div>
+        <div class="breakdown-total accent">
+          <div class="breakdown-total-label">Balance After Bills</div>
+          <div class="breakdown-total-value" id="bd-after">—</div>
+        </div>
       </div>
     </div>
 
@@ -161,7 +205,7 @@
     </p>
     <div class="form-group">
       <label class="form-label" for="input-balance">Amount ($)</label>
-      <input class="form-control" id="input-balance" type="number" step="0.01" placeholder="e.g. 2400.00" />
+      <input class="form-control" id="input-balance" type="number" step="1" placeholder="e.g. 2400" />
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('modal-balance')">Cancel</button>
@@ -171,7 +215,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="/js/api.js?v=2"></script>
-<script src="/js/dashboard.js?v=2"></script>
+<script src="/js/api.js?v=5"></script>
+<script src="/js/dashboard.js?v=5"></script>
 </body>
 </html>

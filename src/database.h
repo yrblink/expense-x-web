@@ -41,6 +41,7 @@ struct BudgetRecord {
     std::string category;
     double      monthlyLimit;
     double      spent;
+    std::string period;       // "weekly" or "monthly"
 };
 
 class Database {
@@ -94,7 +95,8 @@ public:
 
     // Summary & Budgets
     std::vector<CategorySummary>  getCategorySummary(int userId);
-    bool                          setBudget(int userId, const std::string& category, double limit);
+    bool                          setBudget(int userId, const std::string& category,
+                                            double limit, const std::string& period);
     std::vector<BudgetRecord>     getBudgets(int userId);
     bool                          deleteBudget(int id, int userId);
 };

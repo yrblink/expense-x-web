@@ -15,8 +15,8 @@ function toggleTheme() {
 }
 
 function _updateThemeButtons(theme) {
-    document.querySelectorAll('[id="btn-theme-toggle"]').forEach(btn => {
-        const label = btn.querySelector('.theme-label');
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        const label    = btn.querySelector('.theme-label');
         const iconMoon = btn.querySelector('.icon-moon');
         const iconSun  = btn.querySelector('.icon-sun');
         if (label)    label.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
@@ -31,7 +31,7 @@ initTheme();
 document.addEventListener('DOMContentLoaded', () => {
     const theme = localStorage.getItem('theme') || 'light';
     _updateThemeButtons(theme);
-    document.querySelectorAll('[id="btn-theme-toggle"]').forEach(btn => {
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
         if (!btn.dataset.wired) {
             btn.dataset.wired = '1';
             btn.addEventListener('click', toggleTheme);
@@ -107,7 +107,7 @@ function hideAlert(elId) {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// Populate sidebar username, wire up logout, collapse toggle, and theme toggle.
+// Populate username, wire up logout, theme toggle, and sidebar collapse.
 function initSidebar() {
     const nameEl = document.getElementById('sidebar-username');
     if (nameEl) nameEl.textContent = getUsername() || '';
@@ -124,14 +124,30 @@ function initSidebar() {
     const sidebar   = document.querySelector('.sidebar');
     const toggleBtn = document.getElementById('sidebar-toggle');
     if (sidebar && toggleBtn) {
-        if (localStorage.getItem('sidebarCollapsed') === 'true') {
-            sidebar.classList.add('collapsed');
-            toggleBtn.textContent = '›';
-        }
+        // Auto-collapse logic uses media-query default (≤1100px); user can override.
+        const stored = localStorage.getItem('sidebarState');
+        if (stored === 'collapsed') sidebar.classList.add('collapsed');
+        if (stored === 'expanded')  sidebar.classList.add('expanded');
+        _syncToggleArrow(sidebar, toggleBtn);
+
         toggleBtn.addEventListener('click', () => {
-            const collapsed = sidebar.classList.toggle('collapsed');
-            toggleBtn.textContent = collapsed ? '›' : '‹';
-            localStorage.setItem('sidebarCollapsed', String(collapsed));
+            const wideDefault = window.matchMedia('(min-width: 1101px)').matches;
+            if (wideDefault) {
+                const nowCollapsed = sidebar.classList.toggle('collapsed');
+                localStorage.setItem('sidebarState', nowCollapsed ? 'collapsed' : 'open');
+            } else {
+                const nowExpanded = sidebar.classList.toggle('expanded');
+                localStorage.setItem('sidebarState', nowExpanded ? 'expanded' : 'collapsed');
+            }
+            _syncToggleArrow(sidebar, toggleBtn);
         });
     }
+}
+
+function _syncToggleArrow(sidebar, btn) {
+    const wideDefault = window.matchMedia('(min-width: 1101px)').matches;
+    const collapsed = wideDefault
+        ? sidebar.classList.contains('collapsed')
+        : !sidebar.classList.contains('expanded');
+    btn.textContent = collapsed ? '›' : '‹';
 }

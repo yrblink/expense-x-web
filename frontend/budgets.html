@@ -7,70 +7,99 @@
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/style.css?v=5" />
 </head>
 <body>
 <div class="app-layout">
 
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <a href="/dashboard.html" class="sidebar-logo-text">ExpenseX</a>
-      <button class="sidebar-toggle" id="sidebar-toggle">‹</button>
+    <div class="sidebar-brand">
+      <a href="/dashboard.html" class="sidebar-brand-text">Expense<span class="x">X</span></a>
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">‹</button>
     </div>
-    <ul class="nav-list">
+    <ul class="sidebar-nav">
       <li><a href="/dashboard.html">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         <span class="nav-label">Dashboard</span>
       </a></li>
       <li><a href="/transactions.html">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
         <span class="nav-label">Transactions</span>
       </a></li>
       <li><a href="/bills.html">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span class="nav-label">Bills</span>
       </a></li>
       <li><a href="/budgets.html" class="active">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <span class="nav-label">Budgets</span>
       </a></li>
     </ul>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div class="sidebar-foot">
+      <div class="sidebar-foot-user">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span id="sidebar-username"></span>
       </div>
-      <button class="btn-theme-toggle" id="btn-theme-toggle" aria-label="Toggle color theme">
-        <svg class="icon-moon" style="display:none" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <span class="theme-label">Dark Mode</span>
-      </button>
-      <button class="btn-logout" id="btn-logout">Sign Out</button>
+      <div class="sidebar-foot-row">
+        <button class="btn-icon theme-toggle" id="btn-theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-moon" style="display:none" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn-logout" id="btn-logout">Sign Out</button>
+      </div>
     </div>
   </aside>
 
   <main class="main-content">
     <div class="page-header">
       <h1 class="page-title">Budgets</h1>
-      <button class="btn btn-primary" onclick="openModal('modal-add-budget')">+ Set Budget</button>
+      <button class="btn btn-primary" onclick="openAddBudgetModal()">+ Set Budget</button>
     </div>
 
     <div id="alert-budgets" class="alert alert-error"></div>
 
+    <!-- Overview wheel chart -->
+    <div class="budget-overview" id="budget-overview">
+      <div class="budget-overview-wheel">
+        <canvas id="budget-wheel"></canvas>
+        <div class="budget-overview-center">
+          <div class="budget-overview-center-pct" id="overview-pct">0%</div>
+          <div class="budget-overview-center-label">Used</div>
+        </div>
+      </div>
+      <div class="budget-overview-stats">
+        <div class="budget-overview-stat">
+          <div class="budget-overview-stat-label">Total Limit</div>
+          <div class="budget-overview-stat-value" id="overview-limit">$0</div>
+        </div>
+        <div class="budget-overview-stat">
+          <div class="budget-overview-stat-label">Spent</div>
+          <div class="budget-overview-stat-value red" id="overview-spent">$0</div>
+        </div>
+        <div class="budget-overview-stat">
+          <div class="budget-overview-stat-label">Remaining</div>
+          <div class="budget-overview-stat-value green" id="overview-remaining">$0</div>
+        </div>
+      </div>
+    </div>
+
     <div class="panel standalone">
-      <table class="data-table">
-        <thead><tr>
-          <th>Category</th>
-          <th>Limit</th>
-          <th>Spent</th>
-          <th>Progress</th>
-          <th>Used</th>
-          <th></th>
-        </tr></thead>
-        <tbody id="budget-grid">
-          <tr><td colspan="6" class="text-center"><div class="spinner"></div></td></tr>
-        </tbody>
-      </table>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Category</th>
+            <th>Period</th>
+            <th>Limit</th>
+            <th>Spent</th>
+            <th>Progress</th>
+            <th>Used</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="budget-grid">
+            <tr><td colspan="7" class="text-center"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </main>
 </div>
@@ -88,6 +117,13 @@
     <div id="alert-budget-modal" class="alert alert-error"></div>
     <form id="form-add-budget" onsubmit="handleSetBudget(event)">
       <div class="form-group">
+        <label class="form-label">Period</label>
+        <div class="segmented">
+          <button type="button" class="segmented-btn active" data-period="monthly" onclick="setBudgetPeriod('monthly')">Monthly</button>
+          <button type="button" class="segmented-btn"        data-period="weekly"  onclick="setBudgetPeriod('weekly')">Weekly</button>
+        </div>
+      </div>
+      <div class="form-group">
         <label class="form-label" for="budget-category">Category</label>
         <select class="form-control" id="budget-category" required>
           <option value="">Select…</option>
@@ -104,7 +140,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label" for="budget-limit">Monthly Limit ($)</label>
+        <label class="form-label" for="budget-limit"><span id="budget-limit-label">Monthly</span> Limit ($)</label>
         <input class="form-control" id="budget-limit" type="number" step="0.01" min="1" placeholder="e.g. 300.00" required />
       </div>
       <div class="modal-footer">
@@ -115,7 +151,8 @@
   </div>
 </div>
 
-<script src="/js/api.js"></script>
-<script src="/js/budgets.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="/js/api.js?v=4"></script>
+<script src="/js/budgets.js?v=4"></script>
 </body>
 </html>

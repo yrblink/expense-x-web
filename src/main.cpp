@@ -340,7 +340,8 @@ int main() {
         json arr  = json::array();
         for (auto& br : rows)
             arr.push_back({{"id",br.id},{"category",br.category},
-                           {"monthlyLimit",br.monthlyLimit},{"spent",br.spent}});
+                           {"monthlyLimit",br.monthlyLimit},{"spent",br.spent},
+                           {"period",br.period}});
         send(res, 200, arr);
     });
 
@@ -352,9 +353,14 @@ int main() {
         if (body.is_discarded() || !body.contains("category") || !body.contains("monthlyLimit"))
             return send(res, 400, {{"error", "category and monthlyLimit required"}});
 
+        std::string period = body.value("period", std::string{"monthly"});
+        if (period != "weekly" && period != "monthly")
+            return send(res, 400, {{"error", "period must be 'weekly' or 'monthly'"}});
+
         bool ok = db.setBudget(*uid,
                                body["category"].get<std::string>(),
-                               body["monthlyLimit"].get<double>());
+                               body["monthlyLimit"].get<double>(),
+                               period);
         send(res, ok ? 200 : 500, ok ? json{{"ok", true}} : json{{"error", "Failed"}});
     });
 

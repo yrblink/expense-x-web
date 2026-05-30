@@ -46,6 +46,7 @@ Database::Database(const std::string& path) {
             user_id       INTEGER NOT NULL,
             category      TEXT    NOT NULL,
             monthly_limit REAL    NOT NULL,
+            period        TEXT    NOT NULL DEFAULT 'monthly',
             UNIQUE(user_id, category),
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
@@ -77,6 +78,12 @@ Database::Database(const std::string& path) {
                         WHERE user_id = users.id AND is_paid = 1), 0);
         )");
         exec("PRAGMA user_version = 1;");
+    }
+
+    if (schemaVersion < 2) {
+        if (!columnExists("budgets", "period"))
+            exec("ALTER TABLE budgets ADD COLUMN period TEXT NOT NULL DEFAULT 'monthly';");
+        exec("PRAGMA user_version = 2;");
     }
 }
 
@@ -425,28 +432,39 @@ std::vector<CategorySummary> Database::getCategorySummary(int userId) {
     return out;
 }
 
-bool Database::setBudget(int userId, const std::string& category, double limit) {
+bool Database::setBudget(int userId, const std::string& category,
+                          double limit, const std::string& period) {
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db,
-        "INSERT INTO budgets (user_id, category, monthly_limit) VALUES (?,?,?) "
-        "ON CONFLICT(user_id, category) DO UPDATE SET monthly_limit = excluded.monthly_limit",
+        "INSERT INTO budgets (user_id, category, monthly_limit, period) VALUES (?,?,?,?) "
+        "ON CONFLICT(user_id, category) DO UPDATE SET "
+        "  monthly_limit = excluded.monthly_limit, "
+        "  period        = excluded.period",
         -1, &s, nullptr);
     sqlite3_bind_int(s,    1, userId);
     sqlite3_bind_text(s,   2, category.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_double(s, 3, limit);
+    sqlite3_bind_text(s,   4, period.c_str(),   -1, SQLITE_STATIC);
     int rc = sqlite3_step(s);
     sqlite3_finalize(s);
     return rc == SQLITE_DONE;
 }
 
 std::vector<BudgetRecord> Database::getBudgets(int userId) {
+    // "Spent" is computed in the budget's own period window.
+    // Weekly uses ISO week (%Y-%W); monthly uses %Y-%m. Both compare to "now".
     sqlite3_stmt* s;
     sqlite3_prepare_v2(db,
-        "SELECT b.id, b.category, b.monthly_limit, "
-        "COALESCE((SELECT SUM(t.amount) FROM transactions t "
-        "          WHERE t.user_id = b.user_id AND t.category = b.category "
-        "          AND t.type = 'expense' "
-        "          AND strftime('%Y-%m', t.date) = strftime('%Y-%m', 'now')), 0) "
+        "SELECT b.id, b.category, b.monthly_limit, b.period, "
+        "  COALESCE(("
+        "    SELECT SUM(t.amount) FROM transactions t "
+        "    WHERE t.user_id = b.user_id AND t.category = b.category "
+        "      AND t.type = 'expense' "
+        "      AND CASE b.period "
+        "            WHEN 'weekly' THEN strftime('%Y-%W', t.date) = strftime('%Y-%W', 'now') "
+        "            ELSE                strftime('%Y-%m', t.date) = strftime('%Y-%m', 'now') "
+        "          END"
+        "  ), 0) "
         "FROM budgets b WHERE b.user_id = ? ORDER BY b.category",
         -1, &s, nullptr);
     sqlite3_bind_int(s, 1, userId);
@@ -457,7 +475,8 @@ std::vector<BudgetRecord> Database::getBudgets(int userId) {
         br.id           = sqlite3_column_int(s, 0);
         br.category     = reinterpret_cast<const char*>(sqlite3_column_text(s, 1));
         br.monthlyLimit = sqlite3_column_double(s, 2);
-        br.spent        = sqlite3_column_double(s, 3);
+        br.period       = reinterpret_cast<const char*>(sqlite3_column_text(s, 3));
+        br.spent        = sqlite3_column_double(s, 4);
         out.push_back(br);
     }
     sqlite3_finalize(s);
