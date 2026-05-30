@@ -1,8 +1,8 @@
 requireAuth();
 
 const CHART_COLORS = [
-    '#1677ff','#52c41a','#fa8c16','#ff4d4f',
-    '#722ed1','#faad14','#13c2c2','#eb2f96',
+    '#00FFB2','#ef4444','#f59e0b','#a78bfa',
+    '#22c55e','#fb923c','#38bdf8','#f472b6',
 ];
 
 let chart = null;
@@ -45,7 +45,7 @@ async function loadDashboard() {
 
     const afterEl = document.getElementById('bd-after');
     afterEl.textContent = formatMoney(summary.balanceAfterBills);
-    afterEl.style.color = summary.balanceAfterBills < 0 ? 'var(--red)' : 'var(--green)';
+    afterEl.style.color = summary.balanceAfterBills < 0 ? 'var(--red)' : '';
 
     // Spending chart
     renderChart(summary.byCategory);
@@ -92,7 +92,7 @@ function renderChart(byCategory) {
                 legend: {
                     position: 'bottom',
                     labels: {
-                        color: isDark ? '#8b93b0' : '#8c93ab',
+                        color: isDark ? '#4a4a4a' : '#909090',
                         padding: 12,
                         font: { size: 12 },
                     },

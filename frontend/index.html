@@ -6,7 +6,7 @@
   <title>ExpenseX — Sign In</title>
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
@@ -15,16 +15,28 @@
   <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   <span class="theme-label">Dark Mode</span>
 </button>
+
 <div class="auth-page">
 
-  <!-- Left branding panel -->
+  <!-- Left brand panel -->
   <div class="auth-brand">
-    <div class="auth-brand-logo"> ExpenseX</div>
-    <p>Track your spending, manage your bills, and stay on top of your budget!</p>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.25);text-transform:uppercase;">ExpenseX</div>
+
+    <div class="auth-brand-word">Control<br>your<br>money.</div>
+
+    <div class="auth-brand-bottom">
+      <p class="auth-brand-tagline">Track spending, manage bills, and set budgets, all in one place.</p>
+      <div class="auth-features">
+        <div class="auth-feature">Expense Tracking</div>
+        <div class="auth-feature">Bill Management</div>
+        <div class="auth-feature">Monthly Budgets</div>
+      </div>
+    </div>
   </div>
 
   <!-- Right form panel -->
   <div class="auth-form-panel">
+    <div class="auth-logo">ExpenseX</div>
     <div class="auth-card">
       <div class="auth-tabs">
         <button class="auth-tab active" id="tab-login"    onclick="switchTab('login')">Sign In</button>
@@ -43,11 +55,11 @@
           <label class="form-label" for="login-pass">Password</label>
           <input class="form-control" id="login-pass" type="password" placeholder="Enter password" required autocomplete="current-password" />
         </div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" type="submit" id="btn-login">
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;" type="submit" id="btn-login">
           Sign In
         </button>
         <p class="text-sub text-center mt-16" style="font-size:13px;">
-          Don't have an account? <a href="#" onclick="switchTab('register')">Create one</a>
+          No account? <a href="#" onclick="switchTab('register')">Create one</a>
         </p>
       </form>
 
@@ -65,11 +77,11 @@
           <label class="form-label" for="reg-pass2">Confirm Password</label>
           <input class="form-control" id="reg-pass2" type="password" placeholder="Retype password" required autocomplete="new-password" />
         </div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" type="submit" id="btn-register">
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;" type="submit" id="btn-register">
           Create Account
         </button>
         <p class="text-sub text-center mt-16" style="font-size:13px;">
-          Already have an account? <a href="#" onclick="switchTab('login')">Sign in</a>
+          Have an account? <a href="#" onclick="switchTab('login')">Sign in</a>
         </p>
       </form>
     </div>

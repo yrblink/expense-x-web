@@ -6,7 +6,7 @@
   <title>ExpenseX — Budgets</title>
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
@@ -51,17 +51,26 @@
 
   <main class="main-content">
     <div class="page-header">
-      <div>
-        <h1 class="page-title">Monthly Budgets</h1>
-        <p class="text-sub" style="font-size:13px;margin-top:4px;">Spending limits reset each month. Based on your current month's transactions.</p>
-      </div>
+      <h1 class="page-title">Budgets</h1>
       <button class="btn btn-primary" onclick="openModal('modal-add-budget')">+ Set Budget</button>
     </div>
 
     <div id="alert-budgets" class="alert alert-error"></div>
 
-    <div id="budget-grid" class="budget-grid">
-      <div style="grid-column:1/-1;text-align:center;"><div class="spinner"></div></div>
+    <div class="panel standalone">
+      <table class="data-table">
+        <thead><tr>
+          <th>Category</th>
+          <th>Limit</th>
+          <th>Spent</th>
+          <th>Progress</th>
+          <th>Used</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="budget-grid">
+          <tr><td colspan="6" class="text-center"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
     </div>
   </main>
 </div>

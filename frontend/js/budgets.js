@@ -13,32 +13,30 @@ async function loadBudgets() {
 }
 
 function renderBudgets(budgets) {
-    const grid = document.getElementById('budget-grid');
+    const tbody = document.getElementById('budget-grid');
     if (budgets.length === 0) {
-        grid.innerHTML = `
-            <div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--subtext);">
-              No budgets set yet. Add one to start tracking your spending limits.
-            </div>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:48px;color:var(--subtext);">No budgets set yet. Add one to start tracking.</td></tr>`;
         return;
     }
-    grid.innerHTML = budgets.map(b => {
+    tbody.innerHTML = budgets.map(b => {
         const pct   = b.monthlyLimit > 0 ? Math.min((b.spent / b.monthlyLimit) * 100, 100) : 0;
         const cls   = pct >= 90 ? 'over' : pct >= 70 ? 'warn' : 'ok';
         const color = pct >= 90 ? 'var(--red)' : pct >= 70 ? 'var(--yellow)' : 'var(--green)';
         return `
-            <div class="budget-card">
-              <div class="budget-card-header">
-                <div class="budget-category">${b.category}</div>
+            <tr>
+              <td style="font-weight:600;">${b.category}</td>
+              <td>${formatMoney(b.monthlyLimit)}</td>
+              <td>${formatMoney(b.spent)}</td>
+              <td style="min-width:140px;">
+                <div class="progress-bar">
+                  <div class="progress-fill ${cls}" style="width:${pct}%"></div>
+                </div>
+              </td>
+              <td><span class="budget-pct" style="color:${color};">${Math.round(pct)}%</span></td>
+              <td style="text-align:right;">
                 <button class="btn btn-danger btn-sm" onclick="deleteBudget(${b.id})">Remove</button>
-              </div>
-              <div class="budget-amounts">
-                ${formatMoney(b.spent)} spent of ${formatMoney(b.monthlyLimit)} limit
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill ${cls}" style="width:${pct}%"></div>
-              </div>
-              <div class="budget-pct" style="color:${color};">${Math.round(pct)}% used</div>
-            </div>
+              </td>
+            </tr>
         `;
     }).join('');
 }

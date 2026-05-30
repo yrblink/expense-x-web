@@ -27,34 +27,32 @@ async function loadBills() {
 }
 
 function renderBills(bills) {
-    const grid = document.getElementById('bill-grid');
+    const tbody = document.getElementById('bill-grid');
     if (bills.length === 0) {
-        grid.innerHTML = `
-            <div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--subtext);">
-              No bills yet. Add your first one!
-            </div>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:48px;color:var(--subtext);">No bills yet. Add your first one!</td></tr>`;
         return;
     }
-    grid.innerHTML = bills.map(b => `
-        <div class="bill-card ${b.isPaid ? 'paid' : ''}">
-          <div class="bill-card-header">
-            <div>
-              <div class="bill-name">${b.name}</div>
-              <div class="bill-meta">${b.category} · Due ${b.dueDate}</div>
-            </div>
+    tbody.innerHTML = bills.map(b => `
+        <tr style="${b.isPaid ? 'opacity:0.5;' : ''}">
+          <td style="font-weight:600;">${b.name}</td>
+          <td><span class="badge">${b.category}</span></td>
+          <td class="text-sub">${b.dueDate}</td>
+          <td class="bill-amount-cell">${formatMoney(b.amountDue)}</td>
+          <td>
             <span class="badge ${b.isPaid ? 'badge-paid' : 'badge-unpaid'}">
-              ${b.isPaid ? 'Paid' : 'Unpaid'}
+              <span class="bill-status-dot ${b.isPaid ? 'paid' : 'unpaid'}"></span>${b.isPaid ? 'Paid' : 'Unpaid'}
             </span>
-          </div>
-          <div class="bill-amount">${formatMoney(b.amountDue)}</div>
-          <div class="bill-actions">
-            ${b.isPaid
+          </td>
+          <td>
+            <div style="display:flex;gap:6px;justify-content:flex-end;">
+              ${b.isPaid
                 ? `<button class="btn btn-sm" onclick="markUnpaid(${b.id})">Mark Unpaid</button>`
                 : `<button class="btn btn-success btn-sm" onclick="markPaid(${b.id})">Mark Paid</button>`}
-            <button class="btn btn-sm" onclick='openEditBill(${JSON.stringify(b)})'>Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteBill(${b.id})">Delete</button>
-          </div>
-        </div>
+              <button class="btn btn-sm" onclick='openEditBill(${JSON.stringify(b)})'>Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteBill(${b.id})">Delete</button>
+            </div>
+          </td>
+        </tr>
     `).join('');
 }
 

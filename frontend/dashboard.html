@@ -6,7 +6,7 @@
   <title>ExpenseX — Dashboard</title>
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
@@ -28,7 +28,7 @@
         <span class="nav-label">Transactions</span>
       </a></li>
       <li><a href="/bills.html">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span class="nav-label">Bills</span>
       </a></li>
       <li><a href="/budgets.html">
@@ -52,32 +52,33 @@
 
   <!-- Main content -->
   <main class="main-content">
-    <div class="page-header">
-      <h1 class="page-title">Dashboard</h1>
-      <button class="btn btn-primary btn-sm" onclick="openBalanceModal()">Set Starting Balance</button>
+
+    <!-- Hero Balance -->
+    <div class="hero-balance">
+      <div class="hero-balance-left">
+        <div class="hero-balance-label">Current Balance</div>
+        <div class="hero-balance-value green" id="stat-balance">—</div>
+      </div>
+      <button class="btn" style="margin-bottom:8px;" onclick="openBalanceModal()">Set Starting Balance</button>
     </div>
 
-    <!-- Stat cards -->
-    <div class="stat-grid stat-grid-4">
-      <div class="stat-card">
-        <div class="stat-card-label">Current Balance</div>
-        <div class="stat-card-value green" id="stat-balance">—</div>
+    <!-- KPI row -->
+    <div class="kpi-row">
+      <div class="kpi-item">
+        <div class="kpi-label">Income This Month</div>
+        <div class="kpi-value green" id="stat-income">—</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-card-label">Income This Month</div>
-        <div class="stat-card-value green" id="stat-income">—</div>
+      <div class="kpi-item">
+        <div class="kpi-label">Spent This Month</div>
+        <div class="kpi-value red" id="stat-spent">—</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-card-label">Spent This Month</div>
-        <div class="stat-card-value red" id="stat-spent">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-label">Unpaid Bills</div>
-        <div class="stat-card-value yellow" id="stat-bills">—</div>
+      <div class="kpi-item">
+        <div class="kpi-label">Unpaid Bills</div>
+        <div class="kpi-value yellow" id="stat-bills">—</div>
       </div>
     </div>
 
-    <!-- Chart + Recent transactions -->
+    <!-- Chart + Recent Transactions -->
     <div class="two-col">
       <div class="panel">
         <div class="panel-title">Spending by Category</div>
@@ -86,11 +87,10 @@
           <p class="no-data" id="chart-no-data" style="display:none;">No spending data this month</p>
         </div>
       </div>
-
       <div class="panel">
-        <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="panel-title">
           Recent Transactions
-          <a href="/transactions.html" style="font-size:12px;font-weight:400;text-transform:none;letter-spacing:0;">View all →</a>
+          <a href="/transactions.html">View all →</a>
         </div>
         <table class="data-table">
           <thead><tr>
@@ -103,41 +103,48 @@
       </div>
     </div>
 
-    <!-- Balance breakdown + projection -->
-    <div class="panel mt-24" style="margin-top:20px;">
+    <!-- Balance breakdown -->
+    <div class="panel standalone">
       <div class="panel-title">Balance Breakdown</div>
-      <div class="balance-breakdown">
-        <div class="breakdown-row">
-          <span class="breakdown-label">Starting Balance</span>
-          <span class="breakdown-value" id="bd-start">—</span>
+      <div class="ledger">
+        <div class="ledger-row">
+          <span class="ledger-op ledger-op-neutral">↑</span>
+          <span class="ledger-label">Starting Balance</span>
+          <span class="ledger-value" id="bd-start">—</span>
         </div>
-        <div class="breakdown-row">
-          <span class="breakdown-label"><span class="breakdown-op">+</span> Total Income</span>
-          <span class="breakdown-value green" id="bd-income">—</span>
+        <div class="ledger-row">
+          <span class="ledger-op ledger-op-add">+</span>
+          <span class="ledger-label">Total Income</span>
+          <span class="ledger-value green" id="bd-income">—</span>
         </div>
-        <div class="breakdown-row">
-          <span class="breakdown-label"><span class="breakdown-op">−</span> Total Expenses</span>
-          <span class="breakdown-value red" id="bd-expenses">—</span>
+        <div class="ledger-row">
+          <span class="ledger-op ledger-op-sub">−</span>
+          <span class="ledger-label">Total Expenses</span>
+          <span class="ledger-value red" id="bd-expenses">—</span>
         </div>
-        <div class="breakdown-row">
-          <span class="breakdown-label"><span class="breakdown-op">−</span> Paid Bills</span>
-          <span class="breakdown-value red" id="bd-paid">—</span>
-        </div>
-        <div class="breakdown-row breakdown-total">
-          <span class="breakdown-label"><span class="breakdown-op">=</span> Current Balance</span>
-          <span class="breakdown-value" id="bd-current">—</span>
-        </div>
-        <div class="breakdown-divider"></div>
-        <div class="breakdown-row">
-          <span class="breakdown-label"><span class="breakdown-op">−</span> Unpaid Bills</span>
-          <span class="breakdown-value red" id="bd-unpaid">—</span>
-        </div>
-        <div class="breakdown-row breakdown-total">
-          <span class="breakdown-label"><span class="breakdown-op">=</span> After Bills</span>
-          <span class="breakdown-value" id="bd-after">—</span>
+        <div class="ledger-row">
+          <span class="ledger-op ledger-op-sub">−</span>
+          <span class="ledger-label">Paid Bills</span>
+          <span class="ledger-value red" id="bd-paid">—</span>
         </div>
       </div>
+      <div class="ledger-subtotal">
+        <span class="ledger-subtotal-label">Current Balance</span>
+        <span class="ledger-subtotal-value" id="bd-current">—</span>
+      </div>
+      <div class="ledger">
+        <div class="ledger-row">
+          <span class="ledger-op ledger-op-sub">−</span>
+          <span class="ledger-label">Unpaid Bills</span>
+          <span class="ledger-value red" id="bd-unpaid">—</span>
+        </div>
+      </div>
+      <div class="ledger-final">
+        <span class="ledger-final-label">Balance After Bills</span>
+        <span class="ledger-final-value" id="bd-after">—</span>
+      </div>
     </div>
+
   </main>
 </div>
 
@@ -145,16 +152,15 @@
 <div class="modal-backdrop" id="modal-balance">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title">Set Starting Balance</span>
+      <span class="modal-title">Starting Balance</span>
       <button class="modal-close" onclick="closeModal('modal-balance')">×</button>
     </div>
     <div id="alert-balance" class="alert alert-error"></div>
-    <p class="text-sub" style="font-size:13px;margin-bottom:18px;line-height:1.5;">
-      Your starting balance is what you had when you began tracking with ExpenseX.
-      Your current balance is calculated from this — plus income, minus expenses and paid bills.
+    <p class="text-sub" style="font-size:13px;margin-bottom:20px;line-height:1.6;">
+      Your current balance is derived from this starting point — plus income, minus expenses and paid bills.
     </p>
     <div class="form-group">
-      <label class="form-label" for="input-balance">Starting Balance ($)</label>
+      <label class="form-label" for="input-balance">Amount ($)</label>
       <input class="form-control" id="input-balance" type="number" step="0.01" placeholder="e.g. 2400.00" />
     </div>
     <div class="modal-footer">

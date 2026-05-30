@@ -6,7 +6,7 @@
   <title>ExpenseX — Transactions</title>
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
@@ -52,12 +52,12 @@
   <main class="main-content">
     <div class="page-header">
       <h1 class="page-title">Transactions</h1>
-      <button class="btn btn-primary" onclick="openModal('modal-add-tx')">+ Add Transaction</button>
+      <button class="btn btn-primary" onclick="openModal('modal-add-tx')">+ Add</button>
     </div>
 
     <div id="alert-tx" class="alert alert-error"></div>
 
-    <div class="panel">
+    <div class="panel standalone">
       <table class="data-table">
         <thead><tr>
           <th>Date</th>
