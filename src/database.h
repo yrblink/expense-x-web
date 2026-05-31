@@ -77,6 +77,19 @@ public:
                                                       const std::string& notes, const std::string& type);
     bool                             deleteTransaction(int id, int userId);
 
+    // Returns true if a transaction with the same fingerprint already exists for the user.
+    // Used by the CSV import path to skip duplicate rows safely.
+    bool                             transactionFingerprintExists(int userId, const std::string& date,
+                                                                  const std::string& category, double amount,
+                                                                  const std::string& notes, const std::string& type);
+
+    // Wrap a batch of inserts in a single SQLite transaction (much faster than autocommit).
+    void                             beginTx();
+    void                             commitTx();
+
+    // Wipe all of a user's transactions, bills, budgets, and reset starting balance to 0.
+    bool                             deleteAllUserData(int userId);
+
     // Aggregated sums by transaction type.
     double  sumTransactions(int userId, const std::string& type, bool monthOnly);
 

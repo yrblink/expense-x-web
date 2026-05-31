@@ -7,7 +7,7 @@
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/css/style.css?v=5" />
+  <link rel="stylesheet" href="/css/style.css?v=7" />
 </head>
 <body>
 <div class="app-layout">
@@ -53,7 +53,10 @@
   <main class="main-content">
     <div class="page-header">
       <h1 class="page-title">Transactions</h1>
-      <button class="btn btn-primary" onclick="openModal('modal-add-tx')">+ Add</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="openImportModal()">Import CSV</button>
+        <button class="btn btn-primary" onclick="openModal('modal-add-tx')">+ Add</button>
+      </div>
     </div>
 
     <div id="alert-tx" class="alert alert-error"></div>
@@ -161,7 +164,79 @@
   </div>
 </div>
 
-<script src="/js/api.js?v=4"></script>
-<script src="/js/transactions.js?v=4"></script>
+<!-- Import CSV Modal -->
+<div class="modal-backdrop" id="modal-import-tx">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <span class="modal-title">Import CSV</span>
+      <button class="modal-close" onclick="closeModal('modal-import-tx')">×</button>
+    </div>
+    <div id="alert-import" class="alert alert-error"></div>
+
+    <!-- Step 1: pick file -->
+    <label class="import-drop" id="import-drop">
+      <input type="file" id="import-file" accept=".csv,text/csv" />
+      <div class="import-drop-label" id="import-drop-label">Drop a CSV here, or click to browse</div>
+      <div class="import-drop-hint">Chase · BofA · Apple Card · Mint · or any CSV</div>
+    </label>
+
+    <!-- Step 2: file info + column mapping (hidden until file parsed) -->
+    <div id="import-mapping" hidden>
+      <div class="import-file-info">
+        <span class="import-file-name" id="import-file-name">—</span>
+        <span class="import-file-meta">
+          <span id="import-row-count">0 rows</span>
+          <span class="detected" id="import-detected"></span>
+        </span>
+      </div>
+
+      <div class="import-section-label">Column mapping</div>
+      <div class="import-map-grid">
+        <label>Date</label>     <select class="form-control" id="map-date"></select>
+        <label>Amount</label>   <select class="form-control" id="map-amount"></select>
+        <label>Category</label> <select class="form-control" id="map-category"></select>
+        <label>Notes</label>    <select class="form-control" id="map-notes"></select>
+      </div>
+      <label class="import-flag">
+        <input type="checkbox" id="map-negative-expense" checked />
+        Treat negative amounts as expenses (typical for bank exports)
+      </label>
+
+      <div class="import-section-label">Preview (first 3)</div>
+      <div class="import-preview" id="import-preview"></div>
+
+      <div class="import-summary" id="import-summary"></div>
+    </div>
+
+    <!-- Step 3: result (hidden until imported) -->
+    <div id="import-result" hidden>
+      <div class="import-result">
+        <div class="import-result-num" id="import-result-num">0</div>
+        <div class="import-result-line">Transactions imported</div>
+        <div class="import-result-detail" id="import-result-detail"></div>
+      </div>
+      <div class="import-calibrate">
+        <div class="import-calibrate-label">Calibrate Balance · Optional</div>
+        <div class="import-calibrate-text">
+          Enter your actual current bank balance. We'll back-calculate your starting balance so ExpenseX matches your bank.
+        </div>
+        <div class="import-calibrate-row">
+          <input class="form-control" id="calibrate-amount" type="number" step="1" placeholder="Current actual balance ($)" />
+          <button class="btn btn-primary" type="button" onclick="performCalibration()">Set</button>
+        </div>
+        <div class="import-calibrate-feedback" id="calibrate-feedback"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn" id="import-cancel" onclick="closeModal('modal-import-tx')">Cancel</button>
+      <button type="button" class="btn btn-primary" id="import-submit" onclick="submitImport()" disabled>Import</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/transactions.js?v=7"></script>
 </body>
 </html>

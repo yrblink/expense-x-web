@@ -7,9 +7,9 @@
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/css/style.css?v=5" />
+  <link rel="stylesheet" href="/css/style.css?v=7" />
 </head>
-<body>
+<body class="page-dashboard">
 <div class="app-layout">
 
   <aside class="sidebar">
@@ -52,82 +52,31 @@
 
   <main class="main-content">
 
-    <!-- Simple brand mark above balance -->
+    <!-- Simple brand mark -->
     <div class="brand-mark">
       <span class="brand-mark-text">Expense<span class="x">X</span></span>
       <div class="brand-mark-rule"></div>
     </div>
 
-    <!-- Hero Balance -->
-    <div class="hero-balance">
-      <div class="hero-balance-left">
-        <div class="hero-balance-label">Current Balance</div>
-        <div class="hero-balance-value green" id="stat-balance">—</div>
-      </div>
-      <button class="btn" onclick="openBalanceModal()">Set Starting Balance</button>
+    <!-- Data-range marker -->
+    <div class="data-range" id="data-range" hidden>
+      <span class="data-range-pill">Tracking</span>
+      <span class="data-range-dates" id="range-from">—</span>
+      <span class="data-range-arrow">→</span>
+      <span class="data-range-dates" id="range-to">—</span>
+      <span class="data-range-count" id="range-count">— entries</span>
     </div>
 
-    <!-- KPI row -->
-    <div class="kpi-row">
-      <div class="kpi-item">
-        <div class="kpi-label">Income This Month</div>
-        <div class="kpi-value green" id="stat-income">—</div>
-      </div>
-      <div class="kpi-item">
-        <div class="kpi-label">Spent This Month</div>
-        <div class="kpi-value red" id="stat-spent">—</div>
-      </div>
-      <div class="kpi-item">
-        <div class="kpi-label">Unpaid Bills</div>
-        <div class="kpi-value yellow" id="stat-bills">—</div>
-      </div>
-    </div>
-
-    <!-- Chart + Recent Transactions -->
-    <div class="two-col">
-      <div class="panel">
-        <div class="panel-title">Spending by Category</div>
-        <div class="chart-wrap">
-          <canvas id="spending-chart"></canvas>
-          <p class="no-data" id="chart-no-data" style="display:none;">No spending data this month</p>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-title">
-          Recent Transactions
-          <a href="/transactions.html">View all →</a>
-        </div>
-        <div class="data-table-wrap">
-          <table class="data-table">
-            <thead><tr>
-              <th>Date</th><th>Category</th><th>Amount</th><th>Notes</th>
-            </tr></thead>
-            <tbody id="recent-tbody">
-              <tr><td colspan="4" class="text-center"><div class="spinner"></div></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Upcoming Bills -->
+    <!-- Balance Breakdown (hero position) -->
     <div class="panel standalone" style="margin-bottom:24px;">
       <div class="panel-title">
-        Upcoming Bills
-        <a href="/bills.html">Manage →</a>
-      </div>
-      <div id="upcoming-list" class="upcoming-list">
-        <div class="text-center" style="padding:32px;"><div class="spinner"></div></div>
-      </div>
-    </div>
-
-    <!-- Balance breakdown -->
-    <div class="panel standalone">
-      <div class="panel-title">
         Balance Breakdown
-        <div class="view-toggle">
-          <button type="button" class="view-toggle-btn active" data-view="pie" onclick="setBreakdownView('pie')">Pie</button>
-          <button type="button" class="view-toggle-btn"        data-view="bar" onclick="setBreakdownView('bar')">Bar</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="openBalanceModal()">Set Starting Balance</button>
+          <div class="view-toggle">
+            <button type="button" class="view-toggle-btn active" data-view="pie" onclick="setBreakdownView('pie')">Pie</button>
+            <button type="button" class="view-toggle-btn"        data-view="bar" onclick="setBreakdownView('bar')">Bar</button>
+          </div>
         </div>
       </div>
 
@@ -189,6 +138,71 @@
       </div>
     </div>
 
+    <!-- KPI row -->
+    <div class="kpi-row">
+      <div class="kpi-item">
+        <div class="kpi-label">Income This Month</div>
+        <div class="kpi-value green" id="stat-income">—</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-label">Spent This Month</div>
+        <div class="kpi-value red" id="stat-spent">—</div>
+      </div>
+      <div class="kpi-item">
+        <div class="kpi-label">Unpaid Bills</div>
+        <div class="kpi-value yellow" id="stat-bills">—</div>
+      </div>
+    </div>
+
+    <!-- Chart + Recent Transactions -->
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">Spending by Category</div>
+        <div class="chart-wrap">
+          <canvas id="spending-chart"></canvas>
+          <p class="no-data" id="chart-no-data" style="display:none;">No spending data this month</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">
+          Recent Transactions
+          <a href="/transactions.html">View all →</a>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Date</th><th>Category</th><th>Amount</th><th>Notes</th>
+            </tr></thead>
+            <tbody id="recent-tbody">
+              <tr><td colspan="4" class="text-center"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming Bills -->
+    <div class="panel standalone" style="margin-bottom:24px;">
+      <div class="panel-title">
+        Upcoming Bills
+        <a href="/bills.html">Manage →</a>
+      </div>
+      <div id="upcoming-list" class="upcoming-list">
+        <div class="text-center" style="padding:32px;"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="danger-zone">
+      <div>
+        <div class="danger-zone-title">Danger Zone</div>
+        <div class="danger-zone-text">
+          Permanently delete every transaction, bill, and budget, and reset your starting balance to $0. This can't be undone.
+        </div>
+      </div>
+      <button class="btn btn-danger" onclick="openResetModal()">Reset All Data</button>
+    </div>
+
   </main>
 </div>
 
@@ -214,8 +228,30 @@
   </div>
 </div>
 
+<!-- Reset Data Modal -->
+<div class="modal-backdrop" id="modal-reset">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Reset all data</span>
+      <button class="modal-close" onclick="closeModal('modal-reset')">×</button>
+    </div>
+    <div id="alert-reset" class="alert alert-error"></div>
+    <p class="text-sub" style="font-size:13px;margin-bottom:16px;line-height:1.6;">
+      Every transaction, bill, and budget tied to your account will be deleted, and your starting balance will be reset to $0. This can't be undone.
+    </p>
+    <div class="form-group">
+      <label class="form-label" for="reset-confirm">Type <strong style="color:var(--red);">RESET</strong> to confirm</label>
+      <input class="form-control" id="reset-confirm" type="text" autocomplete="off" oninput="updateResetBtn()" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-reset')">Cancel</button>
+      <button class="btn btn-danger-solid" id="btn-reset-confirm" disabled onclick="performReset()">Reset Everything</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-<script src="/js/api.js?v=5"></script>
-<script src="/js/dashboard.js?v=5"></script>
+<script src="/js/api.js?v=7"></script>
+<script src="/js/dashboard.js?v=7"></script>
 </body>
 </html>

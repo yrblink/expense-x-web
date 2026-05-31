@@ -292,6 +292,47 @@ bool Database::deleteTransaction(int id, int userId) {
     return rc == SQLITE_DONE && sqlite3_changes(db) > 0;
 }
 
+bool Database::transactionFingerprintExists(int userId, const std::string& date,
+                                             const std::string& category, double amount,
+                                             const std::string& notes, const std::string& type) {
+    sqlite3_stmt* s;
+    sqlite3_prepare_v2(db,
+        "SELECT 1 FROM transactions "
+        "WHERE user_id = ? AND date = ? AND category = ? "
+        "  AND ABS(amount - ?) < 0.005 "
+        "  AND notes = ? AND type = ? LIMIT 1",
+        -1, &s, nullptr);
+    sqlite3_bind_int(s,    1, userId);
+    sqlite3_bind_text(s,   2, date.c_str(),     -1, SQLITE_STATIC);
+    sqlite3_bind_text(s,   3, category.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_double(s, 4, amount);
+    sqlite3_bind_text(s,   5, notes.c_str(),    -1, SQLITE_STATIC);
+    sqlite3_bind_text(s,   6, type.c_str(),     -1, SQLITE_STATIC);
+    bool exists = (sqlite3_step(s) == SQLITE_ROW);
+    sqlite3_finalize(s);
+    return exists;
+}
+
+void Database::beginTx()  { exec("BEGIN;"); }
+void Database::commitTx() { exec("COMMIT;"); }
+
+bool Database::deleteAllUserData(int userId) {
+    const char* sqls[] = {
+        "DELETE FROM transactions WHERE user_id = ?",
+        "DELETE FROM bills        WHERE user_id = ?",
+        "DELETE FROM budgets      WHERE user_id = ?",
+        "UPDATE users SET starting_balance = 0 WHERE id = ?",
+    };
+    for (const char* sql : sqls) {
+        sqlite3_stmt* s;
+        sqlite3_prepare_v2(db, sql, -1, &s, nullptr);
+        sqlite3_bind_int(s, 1, userId);
+        sqlite3_step(s);
+        sqlite3_finalize(s);
+    }
+    return true;
+}
+
 double Database::sumTransactions(int userId, const std::string& type, bool monthOnly) {
     std::string sql = "SELECT COALESCE(SUM(amount), 0) FROM transactions "
                       "WHERE user_id = ? AND type = ?";

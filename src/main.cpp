@@ -108,6 +108,17 @@ int main() {
                         {"startingBalance", user->startingBalance}});
     });
 
+    svr.Delete("/api/user/data", [&](const httplib::Request& req, httplib::Response& res) {
+        auto uid = authedUser(req, auth);
+        if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
+
+        db.beginTx();
+        db.deleteAllUserData(*uid);
+        db.commitTx();
+
+        send(res, 200, {{"ok", true}, {"balance", db.calculateBalance(*uid)}});
+    });
+
     svr.Put("/api/user/starting_balance", [&](const httplib::Request& req, httplib::Response& res) {
         auto uid = authedUser(req, auth);
         if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
@@ -189,6 +200,49 @@ int main() {
             return send(res, 404, {{"error", "Transaction not found"}});
 
         send(res, 200, {{"ok", true}, {"balance", db.calculateBalance(*uid)}});
+    });
+
+    svr.Post("/api/transactions/bulk", [&](const httplib::Request& req, httplib::Response& res) {
+        auto uid = authedUser(req, auth);
+        if (!uid) return send(res, 401, {{"error", "Unauthorized"}});
+
+        auto body = json::parse(req.body, nullptr, false);
+        if (body.is_discarded() || !body.contains("transactions") || !body["transactions"].is_array())
+            return send(res, 400, {{"error", "transactions array required"}});
+
+        int inserted = 0, skipped = 0, invalid = 0;
+
+        db.beginTx();
+        for (auto& tx : body["transactions"]) {
+            if (!tx.contains("date") || !tx.contains("amount") || !tx.contains("type")) {
+                invalid++; continue;
+            }
+
+            std::string date     = tx.value("date",     std::string{});
+            std::string category = tx.value("category", std::string{"Other"});
+            std::string notes    = tx.value("notes",    std::string{});
+            std::string type     = tx.value("type",     std::string{"expense"});
+            double      amount   = tx.value("amount",   0.0);
+
+            if (date.empty() || amount <= 0 || (type != "expense" && type != "income")) {
+                invalid++; continue;
+            }
+
+            if (db.transactionFingerprintExists(*uid, date, category, amount, notes, type)) {
+                skipped++; continue;
+            }
+
+            if (db.addTransaction(*uid, date, category, amount, notes, type) >= 0)
+                inserted++;
+            else
+                invalid++;
+        }
+        db.commitTx();
+
+        send(res, 200, {{"inserted", inserted},
+                        {"skipped",  skipped},
+                        {"invalid",  invalid},
+                        {"balance",  db.calculateBalance(*uid)}});
     });
 
     svr.Delete("/api/transactions/(\\d+)", [&](const httplib::Request& req, httplib::Response& res) {

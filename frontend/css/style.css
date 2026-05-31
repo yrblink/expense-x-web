@@ -361,6 +361,70 @@ input, select, textarea { font-family: 'Figtree', sans-serif; font-size: 14px; }
   min-width: 0;
 }
 
+/* When the brand-mark is rendered above content (dashboard), the sidebar
+   wordmark would just be redundant noise. Suppress it and let only the toggle
+   button live in the brand area. */
+body.page-dashboard .sidebar-brand-text { display: none; }
+body.page-dashboard .sidebar-brand      { justify-content: center; }
+body.page-dashboard .sidebar-brand::after { display: none; }
+
+/* ── Data-range marker (dashboard) ───────────────────────────────────────────── */
+.data-range {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.4vw, 14px);
+  margin: 4px 0 26px;
+  flex-wrap: wrap;
+}
+.data-range-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.04);
+}
+.data-range-dates {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(18px, 2.2vw, 22px);
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.data-range-arrow {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 700;
+  color: var(--subtext);
+  letter-spacing: 0;
+}
+.data-range-count {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  position: relative;
+  padding-left: 16px;
+}
+.data-range-count::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
 /* ── Brand mark above hero balance — refined editorial monogram ──────────────── */
 .brand-mark {
   display: flex;
@@ -719,6 +783,8 @@ select.form-control option { background: var(--surface2); }
   padding: 32px;
   width: 100%;
   max-width: 440px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   box-shadow: 0 24px 80px rgba(0,0,0,0.4);
   animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1032,6 +1098,47 @@ select.form-control option { background: var(--surface2); }
   color: var(--subtext);
   border: 1px solid var(--border);
 }
+
+/* ── Danger zone (dashboard reset) ───────────────────────────────────────────── */
+.danger-zone {
+  margin-top: 32px;
+  padding: clamp(14px, 2vw, 18px) clamp(16px, 2.4vw, 24px);
+  border: 1px solid rgba(220,38,38,0.28);
+  border-radius: 6px;
+  background: rgba(220,38,38,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+[data-theme="dark"] .danger-zone {
+  border-color: rgba(239,68,68,0.22);
+  background: rgba(239,68,68,0.025);
+}
+.danger-zone-text {
+  font-size: 12px;
+  color: var(--subtext);
+  max-width: 540px;
+}
+.danger-zone-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 4px;
+}
+
+/* Compact danger button — solid red so the destructive action is unambiguous */
+.btn-danger-solid {
+  background: var(--red);
+  color: #ffffff;
+  border-color: var(--red);
+  font-weight: 700;
+}
+.btn-danger-solid:hover { background: #b91c1c; border-color: #b91c1c; }
+.btn-danger-solid:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── Compact view toggle (inside panel titles) ──────────────────────────────── */
 .view-toggle {
@@ -1374,6 +1481,272 @@ select.form-control option { background: var(--surface2); }
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--accent);
+}
+
+/* ── CSV Import (transactions page) ──────────────────────────────────────────── */
+.modal.modal-wide {
+  max-width: 560px;
+  padding: 22px 24px;
+}
+.modal.modal-wide .modal-header {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+}
+
+.import-drop {
+  border: 1.5px dashed var(--border);
+  border-radius: 5px;
+  padding: 14px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  margin-bottom: 12px;
+}
+.import-drop:hover,
+.import-drop.dragover {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.04);
+}
+.import-drop input[type="file"] { display: none; }
+.import-drop-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.import-drop-hint {
+  font-size: 10px;
+  color: var(--subtext);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.import-file-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+.import-file-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.import-file-meta {
+  font-size: 9.5px;
+  color: var(--subtext);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+.import-file-meta .detected {
+  color: var(--accent);
+  margin-left: 6px;
+}
+
+.import-section-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  margin: 10px 0 6px;
+}
+
+.import-map-grid {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 6px 10px;
+  align-items: center;
+  margin-bottom: 2px;
+}
+.import-map-grid label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--subtext);
+}
+.import-map-grid select {
+  padding: 5px 8px;
+  font-size: 12px;
+  border-width: 1px;
+}
+
+.import-flag {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: var(--text);
+}
+.import-flag input { width: 13px; height: 13px; accent-color: var(--accent); }
+
+.import-preview {
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+.import-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+.import-preview th {
+  text-align: left;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--subtext);
+  font-weight: 700;
+  padding: 5px 8px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.import-preview td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+.import-preview tr:last-child td { border-bottom: none; }
+.import-preview .col-amount { text-align: right; font-weight: 600; }
+.import-preview .row-invalid td { opacity: 0.4; }
+
+.import-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 11.5px;
+}
+.import-summary-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  margin-right: 2px;
+}
+.import-summary-num.skip    { color: var(--yellow); }
+.import-summary-num.invalid { color: var(--red); }
+
+.import-result {
+  text-align: center;
+  padding: 16px 6px 4px;
+}
+.import-result-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--accent);
+}
+.import-result-line {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--subtext);
+  margin-top: 6px;
+}
+.import-result-detail {
+  font-size: 11.5px;
+  color: var(--subtext);
+  margin-top: 10px;
+}
+
+/* Post-import calibration block — sits below the result number */
+.import-calibrate {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface2);
+}
+.import-calibrate-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.import-calibrate-text {
+  font-size: 11.5px;
+  color: var(--subtext);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.import-calibrate-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.import-calibrate-row .form-control { flex: 1; }
+.import-calibrate-feedback {
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.import-calibrate-feedback.ok  { color: var(--green); }
+.import-calibrate-feedback.err { color: var(--red); }
+
+/* Modal footer in import modal — tighter spacing too */
+.modal.modal-wide .modal-footer { margin-top: 14px; }
+
+/* Short viewports: shrink padding, gaps, and font sizes so the modal fits */
+@media (max-height: 760px) {
+  .modal.modal-wide {
+    padding: 16px 20px;
+  }
+  .modal.modal-wide .modal-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+  .import-drop { padding: 10px 12px; margin-bottom: 8px; }
+  .import-file-info { padding: 6px 10px; margin-bottom: 6px; }
+  .import-section-label { margin: 6px 0 4px; }
+  .import-map-grid { gap: 4px 8px; }
+  .import-map-grid select { padding: 4px 7px; font-size: 11.5px; }
+  .import-flag { margin-top: 6px; font-size: 11px; }
+  .import-preview th, .import-preview td { padding: 4px 7px; }
+  .import-summary { padding: 6px 10px; margin-top: 6px; font-size: 11px; }
+  .import-result { padding: 10px 6px 2px; }
+  .import-result-num { font-size: 36px; }
+  .modal.modal-wide .modal-footer { margin-top: 10px; }
+}
+
+/* Narrow viewports: let the mapping label column shrink and stack the summary */
+@media (max-width: 480px) {
+  .modal.modal-wide {
+    padding: 16px;
+    max-width: calc(100vw - 16px);
+  }
+  .import-map-grid { grid-template-columns: 64px 1fr; }
+  .import-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 }
 
 /* ── Transaction type toggle ─────────────────────────────────────────────────── */

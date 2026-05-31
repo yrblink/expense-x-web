@@ -33,13 +33,15 @@ async function loadDashboard() {
     const bills   = await billsRes.json();
     lastSummary = summary;
 
-    // Stat cards
-    setText('stat-balance', formatMoney(summary.balance));
-    setText('stat-income',  formatMoney(summary.monthlyIncome));
-    setText('stat-spent',   formatMoney(summary.totalSpent));
-    setText('stat-bills',   formatMoney(summary.billsDue));
+    // KPI row
+    setText('stat-income', formatMoney(summary.monthlyIncome));
+    setText('stat-spent',  formatMoney(summary.totalSpent));
+    setText('stat-bills',  formatMoney(summary.billsDue));
 
-    // Balance breakdown bars
+    // Date range marker (uses tx + bills dates)
+    renderDataRange(txData, bills);
+
+    // Balance breakdown (hero panel)
     renderBreakdown(summary);
 
     // Spending chart
@@ -55,6 +57,27 @@ async function loadDashboard() {
 function setText(id, value) {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
+}
+
+function renderDataRange(transactions, bills) {
+    const el = document.getElementById('data-range');
+    if (!el) return;
+
+    // Collect every date in scope: transaction dates + bill due dates.
+    const dates = [];
+    transactions.forEach(t => t.date && dates.push(t.date));
+    bills.forEach(b => b.dueDate && dates.push(b.dueDate));
+
+    if (dates.length === 0) {
+        el.hidden = true;
+        return;
+    }
+    dates.sort();
+    el.hidden = false;
+    document.getElementById('range-from').textContent  = dates[0];
+    document.getElementById('range-to').textContent    = dates[dates.length - 1];
+    const n = transactions.length;
+    document.getElementById('range-count').textContent = `${n} ${n === 1 ? 'entry' : 'entries'}`;
 }
 
 function renderBreakdown(s) {
@@ -298,5 +321,35 @@ async function saveStartingBalance() {
         await loadDashboard();
     } else {
         showAlert('alert-balance', 'Failed to save — check your connection');
+    }
+}
+
+// ── Reset all data ────────────────────────────────────────────────────────────
+function openResetModal() {
+    document.getElementById('reset-confirm').value = '';
+    document.getElementById('btn-reset-confirm').disabled = true;
+    hideAlert('alert-reset');
+    openModal('modal-reset');
+}
+
+function updateResetBtn() {
+    const val = document.getElementById('reset-confirm').value;
+    document.getElementById('btn-reset-confirm').disabled = val !== 'RESET';
+}
+
+async function performReset() {
+    const btn = document.getElementById('btn-reset-confirm');
+    btn.disabled = true;
+    btn.textContent = 'Resetting…';
+
+    const res = await apiDelete('/user/data');
+    if (res && res.ok) {
+        closeModal('modal-reset');
+        btn.textContent = 'Reset Everything';
+        await loadDashboard();
+    } else {
+        btn.disabled = false;
+        btn.textContent = 'Reset Everything';
+        showAlert('alert-reset', 'Failed to reset — check your connection');
     }
 }
